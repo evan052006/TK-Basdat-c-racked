@@ -21,7 +21,7 @@ def require_roles(*allowed_roles):
             token = request.COOKIES.get("access_token")
 
             if not token:
-                return redirect("login_page")
+                return redirect("accounts:login")
 
             try:
                 payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
