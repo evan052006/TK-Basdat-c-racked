@@ -1,57 +1,54 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import UserAccount, Role
 from .queries import accounts_db
 
 
 def register(request):
     if request.method == "GET":
-        return render(request, "accounts/register.html")
+        roles = accounts_db.get_roles()
+        return render(request, "register.html", {"roles": roles})
 
     if request.method == "POST":
         username = request.POST.get("username")
         raw_password = request.POST.get("password")
         selected_role_ids = request.POST.getlist("roles")
 
-        if UserAccount.objects.filter(username=username).exists():
-            roles = Role.objects.all()
-            return render(
-                request,
-                "accounts/register.html",
-                {"roles": roles, "error": "Username already exists"},
-            )
-
         hashed_password = make_password(raw_password)
 
         with accounts_db.transaction():
+            if accounts_db.get_acc_by_username(username=username) is not None:
+                return render(
+                    request,
+                    "register.html",
+                    {"error": "Username already exists"},
+                )
             user_id = accounts_db.create_user(
                 username=username, password=hashed_password
             )
-            data_to_insert = [
-                {"user_id": user_id, "role_id": role_id}
-                for role_id in selected_role_ids
-            ]
-            accounts_db.insert_roles(data_to_insert)
+            for role in selected_role_ids:
+                accounts_db.insert_roles(user_id=user_id, role_id=role)
 
-        return redirect("login")
+        return redirect("accounts:login")
 
 
 def login(request):
     if request.method == "GET":
-        return render(request, "accounts/login.html")
+        return render(request, "login.html")
 
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        user = accounts_db.get_acc_by_username(username)
+        user = accounts_db.get_acc_by_username(username=username)
 
         if user is not None and check_password(password, user["password"]):
-            refresh = RefreshToken.for_user(user["user_id"])
+            refresh = RefreshToken()
+            refresh["user_id"] = str(user)
+
             access_token = str(refresh.access_token)
 
-            response = redirect("home")
+            response = redirect("accounts:register")
 
             response.set_cookie(
                 key="access_token",
@@ -63,7 +60,7 @@ def login(request):
 
             return response
 
-        return render(request, "accounts/login.html", {"error": "Invalid credentials"})
+        return render(request, "login.html", {"error": "Invalid credentials"})
 
 
 def logout(request):

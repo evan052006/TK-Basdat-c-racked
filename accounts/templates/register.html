@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Register</title>
+  </head>
+  <body>
+    <h2>Register Account</h2>
+
+    {% if error %}
+    <p style="color: red">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="{% url 'accounts:register' %}">
+      {% csrf_token %}
+
+      <div>
+        <label for="username">Username:</label><br />
+        <input type="text" id="username" name="username" required />
+      </div>
+      <br />
+
+      <div>
+        <label for="password">Password:</label><br />
+        <input type="password" id="password" name="password" required />
+      </div>
+      <br />
+
+      <div>
+        <label>Select Roles:</label><br />
+        {% for role in roles %}
+        <label>
+          <input type="checkbox" name="roles" value="{{ role.role_id }}" />
+          {{ role.role_name }} </label
+        ><br />
+        {% empty %}
+        <p style="color: gray"><em>No roles found in database.</em></p>
+        {% endfor %}
+      </div>
+      <br />
+
+      <button type="submit">Register</button>
+    </form>
+
+    <p>
+      Already have an account?
+      <a href="{% url 'accounts:login' %}">Login here</a>.
+    </p>
+  </body>
+</html>
