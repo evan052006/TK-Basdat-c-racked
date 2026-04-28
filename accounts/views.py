@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from .queries import accounts_db
+from .decorators import require_roles
 
 
 def register(request):
@@ -44,7 +45,7 @@ def login(request):
 
         if user is not None and check_password(password, user["password"]):
             refresh = RefreshToken()
-            refresh["user_id"] = str(user)
+            refresh["user_id"] = str(user["user_id"])
 
             access_token = str(refresh.access_token)
 
@@ -63,7 +64,8 @@ def login(request):
         return render(request, "login.html", {"error": "Invalid credentials"})
 
 
+@require_roles("ADMIN")
 def logout(request):
-    response = redirect("login")
+    response = redirect("accounts:login")
     response.delete_cookie("access_token")
     return response
