@@ -1,10 +1,8 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Register</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+
+{% block title %}Tiktaktuk Login{% endblock %}
+
+{% block content %}
     <h2>Register Account</h2>
 
     {% if error %}
@@ -46,5 +44,4 @@
       Already have an account?
       <a href="{% url 'accounts:login' %}">Login here</a>.
     </p>
-  </body>
-</html>
+{% endblock %}
