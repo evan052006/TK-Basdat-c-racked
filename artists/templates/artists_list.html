@@ -5,7 +5,7 @@
   <div class="mb-4 text-start">
     <h2 class="fw-bold">Daftar Artis</h2>
     {% if user_role == "ADMIN" %}
-      <button class="btn btn-primary mt-2">+ Tambah Artis</button>
+      <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#tambahArtisModal">+ Tambah Artis</button>
     {% endif %}
   </div>
 
@@ -35,6 +35,37 @@
       </div>
     </div>
   </div>
+
+  {% if user_role == "ADMIN" %}
+    <div class="modal fade" id="tambahArtisModal" tabindex="-1" aria-labelledby="tambahArtisModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="tambahArtisModalLabel">Tambah Artis Baru</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="formTambahArtis">
+            <div class="modal-body">
+              {% csrf_token %}
+              
+              <div class="mb-3">
+                <label for="inputNamaArtis" class="form-label">Nama Artis</label>
+                <input type="text" class="form-control" id="inputNamaArtis" required placeholder="Masukkan nama artis">
+              </div>
+              <div class="mb-3">
+                <label for="inputGenreArtis" class="form-label">Genre</label>
+                <input type="text" class="form-control" id="inputGenreArtis" required placeholder="Masukkan genre artis">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-primary">Tambah Artis</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
   <div class="card shadow-sm border-0">
     <div class="card-body">
@@ -69,6 +100,52 @@
 </div>
 
 <script>
+
+
+    const formTambahArtis = document.getElementById("formTambahArtis");
+
+    if (formTambahArtis) {
+        formTambahArtis.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const nama = document.getElementById("inputNamaArtis").value.trim();
+            const genre = document.getElementById("inputGenreArtis").value.trim();
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            try {
+                const response = await fetch("{% url 'artists:add_artist' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ name: nama, genre: genre })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === "success") {
+                    const modalElement = document.getElementById('tambahArtisModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    modalInstance.hide();
+                    
+                    formTambahArtis.reset();
+                    
+                    searchArtistsAPI(searchInput.value.trim()); 
+                    updateArtistCount();
+                    updateGenreCount();
+                    alert("Berhasil menambahkan artis baru!");
+                } else {
+                    alert("Gagal menambahkan artis: " + (data.message || "Kesalahan server"));
+                }
+            } catch (error) {
+                console.error("Gagal melakukan POST artis:", error);
+                alert("Terjadi kesalahan pada sistem.");
+            }
+        });
+    }
+
     const total_artist_text = document.getElementById("total_artist_text");
     const genre_count_text = document.getElementById("genre_count_text");
     const performing_artist_text = document.getElementById("performing_artist_text");

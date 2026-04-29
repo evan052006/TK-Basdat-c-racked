@@ -1,6 +1,8 @@
 from django.shortcuts import render
+import json
 from django.http import JsonResponse
 from accounts.decorators import require_roles
+from django.views.decorators.http import require_POST
 from .queries import artists_db
 
 
@@ -9,16 +11,26 @@ def artist_page(request):
     return render(request, "artists_list.html")
 
 
+@require_POST
 @require_roles("ADMIN")
 def create_artist(request):
-    pass
+    data = json.loads(request.body)
+
+    name = data.get("name")
+    genre = data.get("genre")
+
+    artists_db.create_artist(name=name, genre=genre)
+
+    return JsonResponse({"status": "success"}, status=200)
 
 
+@require_POST
 @require_roles("ADMIN")
 def update_artist(request):
     pass
 
 
+@require_POST
 @require_roles("ADMIN")
 def delete_artist(request):
     pass

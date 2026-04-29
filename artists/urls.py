@@ -5,6 +5,7 @@ from .views import (
     get_genre_count,
     get_performing_artists_count,
     get_artists,
+    create_artist,
 )
 
 app_name = "artists"
@@ -19,4 +20,5 @@ urlpatterns = [
         get_performing_artists_count,
         name="event_artist_count",
     ),
+    path("api/add_artist/", create_artist, name="add_artist"),
 ]
