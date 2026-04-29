@@ -1,3 +1,3 @@
 -- :name get_artists :many
 -- :doc Get all current artists
-SELECT * FROM artist
+SELECT artist_id, name, genre FROM artist

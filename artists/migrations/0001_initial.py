@@ -4,7 +4,8 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    dependencies = [("events", "0001_initial")]
+    # dependencies = [("events", "0001_initial")]
+    dependencies = []
 
     FORWARD_SQL = """
         CREATE TABLE ARTIST (
@@ -17,8 +18,6 @@ class Migration(migrations.Migration):
             event_id UUID,
             artist_id UUID,
             role VARCHAR(100),
-            PRIMARY KEY (event_id, artist_id),
-            FOREIGN KEY (event_id) REFERENCES EVENT(event_id),
             FOREIGN KEY (artist_id) REFERENCES ARTIST(artist_id)
         );
 
@@ -27,10 +26,12 @@ class Migration(migrations.Migration):
             category_name VARCHAR(50) NOT NULL,
             quota INTEGER NOT NULL CHECK (quota > 0),
             price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
-            tevent_id UUID NOT NULL,
-            FOREIGN KEY (tevent_id) REFERENCES EVENT(event_id)
+            tevent_id UUID NOT NULL
         );
     """
+
+    # NOTE add to events later
+    #             FOREIGN KEY (event_id) REFERENCES EVENT(event_id),
 
     REVERSE_SQL = """
         DROP TABLE IF EXISTS TICKET_CATEGORY;

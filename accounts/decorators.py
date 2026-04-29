@@ -21,6 +21,8 @@ def require_roles(*allowed_roles):
             token = request.COOKIES.get("access_token")
 
             if not token:
+                if "GUEST" in allowed_roles:
+                    return view_func(request, *args, **kwargs)
                 return redirect("accounts:login")
 
             try:

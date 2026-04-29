@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from .queries import accounts_db
-from .decorators import require_roles
 
 
 def register(request):
@@ -64,7 +63,6 @@ def login(request):
         return render(request, "login.html", {"error": "Invalid credentials"})
 
 
-@require_roles("ADMIN")
 def logout(request):
     response = redirect("accounts:login")
     response.delete_cookie("access_token")

@@ -1,0 +1,232 @@
+{% extends "common/base.html" %}
+{% block title %}Artists{% endblock %}
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="mb-4 text-start">
+    <h2 class="fw-bold">Daftar Artis</h2>
+    {% if user_role == "ADMIN" %}
+      <button class="btn btn-primary mt-2">+ Tambah Artis</button>
+    {% endif %}
+  </div>
+
+  <div class="row mb-5">
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm text-center border-0 bg-light">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase">Total Artis</h6>
+          <h3 id="total_artist_text" class="fw-bold mb-0">-</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm text-center border-0 bg-light">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase">Genre</h6>
+          <h3 id="genre_count_text" class="fw-bold mb-0">-</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm text-center border-0 bg-light">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase">Tampil di Event</h6>
+          <h3 id="performing_artist_text" class="fw-bold text-success mb-0">-</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title fw-bold mb-0">Tabel Artis</h5>
+        <input
+          type="text"
+          id="searchArtis"
+          class="form-control w-25"
+          placeholder="Cari nama artis atau genre..."
+        />
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col">No</th>
+              <th scope="col">Nama Artis</th>
+              <th scope="col">Genre</th>
+              {% if user_role == "ADMIN" %}
+              <th scope="col">Aksi</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody id="tabelArtisBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    const total_artist_text = document.getElementById("total_artist_text");
+    const genre_count_text = document.getElementById("genre_count_text");
+    const performing_artist_text = document.getElementById("performing_artist_text");
+    const searchInput = document.getElementById("searchArtis");
+    const tableBody = document.getElementById("tabelArtisBody");
+
+    let searchTimeout = null;
+
+    searchInput.addEventListener("input", function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        searchTimeout = setTimeout(() => {
+            searchArtistsAPI(query);
+        }, 300);
+    });
+
+    async function searchArtistsAPI(query) {
+        try {
+
+            const url = `{% url 'artists:all_artist' %}?query=${encodeURIComponent(query)}`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+                renderArtistTable(data.artists);
+            }
+
+        } catch (error) {
+            console.error("Failed to search artists:", error);
+        }
+    }
+
+    function renderArtistTable(artists) {
+        tableBody.innerHTML = "";
+
+        if (artists.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Tidak ada artis yang ditemukan.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        artists.forEach((artist, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td class="fw-semibold">${artist.name}</td>
+                <td>${artist.genre}</td>
+                {% if user_role == "ADMIN" %}
+                <td>
+                    <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                </td>
+                {% endif %}
+            `;
+            
+            tableBody.appendChild(row);
+        });
+    }
+
+    async function updateArtistCount() {
+        try {
+            const response = await fetch("{% url 'artists:artist_count' %}", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+                console.log("Updated count:", data.total_artists);
+                total_artist_text.innerText = data.total_artists
+            }
+        } catch (error) {
+            console.error("Failed to fetch artist count:", error);
+        }
+    }
+
+
+    async function updateGenreCount() {
+        try {
+            const response = await fetch("{% url 'artists:genre_count' %}", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+                console.log("Updated count:", data.total_genre);
+                genre_count_text.innerText = data.total_genre
+            }
+        } catch (error) {
+            console.error("Failed to fetch genre count:", error);
+        }
+    }
+
+
+    async function updateArtistEventCount() {
+        try {
+            const response = await fetch("{% url 'artists:event_artist_count' %}", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+                console.log("Updated count:", data.total_artists);
+                performing_artist_text.innerText = data.total_artists
+            }
+        } catch (error) {
+            console.error("Failed to fetch artist count:", error);
+        }
+    }
+
+    updateArtistCount();
+    updateGenreCount();
+    updateArtistEventCount();
+    searchArtistsAPI("");
+
+    setInterval(updateArtistCount, 5000);
+    setInterval(updateGenreCount, 5000);
+    setInterval(updateArtistEventCount, 5000);
+</script>
+{% endblock %}

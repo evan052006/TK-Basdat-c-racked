@@ -1,3 +1,56 @@
 from django.shortcuts import render
+from django.http import JsonResponse
+from accounts.decorators import require_roles
+from .queries import artists_db
 
-# Create your views here.
+
+@require_roles("GUEST", "CUSTOMER", "ORGANIZER", "ADMIN")
+def artist_page(request):
+    return render(request, "artists_list.html")
+
+
+@require_roles("ADMIN")
+def create_artist(request):
+    pass
+
+
+@require_roles("ADMIN")
+def update_artist(request):
+    pass
+
+
+@require_roles("ADMIN")
+def delete_artist(request):
+    pass
+
+
+@require_roles("GUEST", "CUSTOMER", "ORGANIZER", "ADMIN")
+def get_artists(request):
+    query = request.GET.get("query")
+    if query == "":
+        artists = artists_db.get_artists()
+    else:
+        artists = artists_db.get_artists_by_name(pattern=f"%{query}%")
+    return JsonResponse({"status": "success", "artists": list(artists)}, status=200)
+
+
+@require_roles("GUEST", "CUSTOMER", "ORGANIZER", "ADMIN")
+def get_artists_count(request):
+    total_artists = artists_db.get_artist_count()
+    return JsonResponse(
+        {"status": "success", "total_artists": total_artists}, status=200
+    )
+
+
+@require_roles("GUEST", "CUSTOMER", "ORGANIZER", "ADMIN")
+def get_genre_count(request):
+    total_genres = artists_db.get_genre_count()
+    return JsonResponse({"status": "success", "total_genre": total_genres}, status=200)
+
+
+@require_roles("GUEST", "CUSTOMER", "ORGANIZER", "ADMIN")
+def get_performing_artists_count(request):
+    total_artists = artists_db.get_artist_in_events_count()
+    return JsonResponse(
+        {"status": "success", "total_artists": total_artists}, status=200
+    )
