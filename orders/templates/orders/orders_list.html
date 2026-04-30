@@ -16,13 +16,6 @@
         <a href="{% url 'orders:promotions_list' %}"
           style="display:inline-flex; align-items:center; gap:0.35rem; background:#fff; color:var(--ink); border:1px solid var(--line-strong); border-radius:10px; padding:0.52rem 0.85rem; text-decoration:none; font-weight:600;">
           Kelola Promo
-        </a>
-        {% if role == "ADMIN" %}
-        <button data-bs-toggle="modal" data-bs-target="#createOrderModal"
-          style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap;">
-          + Buat Order
-        </button>
-        {% endif %}
       </div>
     </div>
 
@@ -170,46 +163,6 @@
 
 {% block modals %}
 {% if role == "ADMIN" %}
-<!-- Create Order Modal -->
-<div class="modal fade" id="createOrderModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Buat Order Baru</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="POST" action="{% url 'orders:create_order' %}">
-        {% csrf_token %}
-        <div class="modal-body" style="display:flex; flex-direction:column; gap:0.9rem;">
-          <div>
-            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">ORDER DATE</label>
-            <input type="datetime-local" name="order_date" style="width:100%;" required>
-          </div>
-          <div>
-            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">PAYMENT STATUS</label>
-            <select name="payment_status" style="width:100%;" required>
-              <option value="PENDING">Pending</option>
-              <option value="PAID">Lunas (PAID)</option>
-              <option value="CANCELLED">Dibatalkan (CANCELLED)</option>
-            </select>
-          </div>
-          <div>
-            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TOTAL AMOUNT</label>
-            <input type="number" name="total_amount" placeholder="cth. 500000" min="0" step="100" style="width:100%;" required>
-          </div>
-          <div>
-            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">CUSTOMER ID</label>
-            <input type="text" name="customer_id" placeholder="Customer UUID" style="width:100%;" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
-          <button type="submit">Buat</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
 <!-- Edit Modal -->
 <div class="modal fade" id="editOrderModal" tabindex="-1" aria-hidden="true">
