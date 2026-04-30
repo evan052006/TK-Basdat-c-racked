@@ -15,13 +15,32 @@
     <div class="collapse navbar-collapse" id="navbarNavAdmin">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Manajemen Venue</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Manajemen Kursi</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'artists:list' %}">Manajemen Artis</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Kategori Tiket</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Manajemen Tiket</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'orders:orders_list' %}">Semua Order</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'orders:promotions_list' %}">Promosi</a></li>
+        
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="adminManajemenDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Manajemen
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="adminManajemenDropdown">
+            <li><a class="dropdown-item" href="#">Manajemen Venue</a></li>
+            <li><a class="dropdown-item" href="#">Manajemen Kursi</a></li>
+            <li><a class="dropdown-item" href="{% url 'artists:list' %}">Manajemen Artis</a></li>
+            <li><a class="dropdown-item" href="{% url 'orders:promotions_list' %}">Promosi</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#">Kategori Tiket</a></li>
+            <li><a class="dropdown-item" href="#">Manajemen Tiket</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="adminAsetDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Aset & Order
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="adminAsetDropdown">
+            <li><a class="dropdown-item" href="{% url 'orders:orders_list' %}">Semua Order</a></li>
+            <li><a class="dropdown-item" href="#">Tiket (Aset)</a></li>
+            <li><a class="dropdown-item" href="#">Order (Aset)</a></li>
+          </ul>
+        </li>
       </ul>
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Profil</a></li>
