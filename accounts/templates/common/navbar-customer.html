@@ -16,11 +16,11 @@
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Tiket Saya</a></li>
-        <li class="nav-item"><a class="nav-link" href="/orders/">Pesanan</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'orders:orders_list' %}">Pesanan</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Cari Event</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Promosi</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'orders:promotions_list' %}">Promosi</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Venue</a></li>
-        <li class="nav-item"><a class="nav-link" href="/artists/list/">Artis</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'artists:list' %}">Artis</a></li>
       </ul>
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Profil</a></li>
