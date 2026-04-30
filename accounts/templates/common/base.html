@@ -325,8 +325,8 @@
         padding: clamp(1.5rem, 4vw, 2.5rem);
       }
 
-      .btn,
-      button,
+      .btn:not(.btn-close),
+      button:not(.btn-close),
       input[type="submit"] {
         border: 1px solid var(--ink) !important;
         border-radius: 10px;
@@ -347,9 +347,9 @@
         transform: translateY(-1px);
       }
 
-      .btn-secondary,
-      .btn-outline-secondary,
-      button[data-bs-dismiss="modal"] {
+      .btn-secondary:not(.btn-close),
+      .btn-outline-secondary:not(.btn-close),
+      button[data-bs-dismiss="modal"]:not(.btn-close) {
         border-color: var(--line-strong) !important;
         background: var(--surface) !important;
         color: var(--ink) !important;
