@@ -1,38 +1,28 @@
 {% extends "common/base.html" %}
 {% block title %}Artists{% endblock %}
 {% block content %}
-<div class="container mt-5 mb-5">
-  <div class="mb-4 text-start">
-    <h2 class="fw-bold">Daftar Artis</h2>
+<section class="luxury-page">
+  <div class="luxury-container">
+  <div class="mb-5 text-start">
+    <p class="luxury-kicker">Catalogue</p>
+    <h1>Artists</h1>
     {% if user_role == "ADMIN" %}
-      <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#tambahArtisModal">+ Tambah Artis</button>
+      <button class="btn mt-4" data-bs-toggle="modal" data-bs-target="#tambahArtisModal">Tambah Artis</button>
     {% endif %}
   </div>
 
-  <div class="row mb-5">
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm text-center border-0 bg-light">
-        <div class="card-body">
-          <h6 class="text-muted text-uppercase">Total Artis</h6>
-          <h3 id="total_artist_text" class="fw-bold mb-0">-</h3>
-        </div>
-      </div>
+  <div class="luxury-grid mb-5">
+    <div class="luxury-panel">
+      <p class="luxury-kicker">Total Artis</p>
+      <h3 id="total_artist_text">-</h3>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm text-center border-0 bg-light">
-        <div class="card-body">
-          <h6 class="text-muted text-uppercase">Genre</h6>
-          <h3 id="genre_count_text" class="fw-bold mb-0">-</h3>
-        </div>
-      </div>
+    <div class="luxury-panel">
+      <p class="luxury-kicker">Genre</p>
+      <h3 id="genre_count_text">-</h3>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm text-center border-0 bg-light">
-        <div class="card-body">
-          <h6 class="text-muted text-uppercase">Tampil di Event</h6>
-          <h3 id="performing_artist_text" class="fw-bold text-success mb-0">-</h3>
-        </div>
-      </div>
+    <div class="luxury-panel">
+      <p class="luxury-kicker">Tampil di Event</p>
+      <h3 id="performing_artist_text">-</h3>
     </div>
   </div>
 
@@ -41,25 +31,25 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title fw-bold" id="tambahArtisModalLabel">Tambah Artis Baru</h5>
+            <h5 class="modal-title" id="tambahArtisModalLabel">Tambah Artis Baru</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <form id="formTambahArtis">
             <div class="modal-body">
               {% csrf_token %}
               
-              <div class="mb-3">
+              <div class="mb-4">
                 <label for="inputNamaArtis" class="form-label">Nama Artis</label>
                 <input type="text" class="form-control" id="inputNamaArtis" required placeholder="Masukkan nama artis">
               </div>
-              <div class="mb-3">
+              <div class="mb-4">
                 <label for="inputGenreArtis" class="form-label">Genre</label>
                 <input type="text" class="form-control" id="inputGenreArtis" required placeholder="Masukkan genre artis">
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-primary">Tambah Artis</button>
+              <button type="button" class="btn" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn">Tambah Artis</button>
             </div>
           </form>
         </div>
@@ -67,21 +57,21 @@
     </div>
   {% endif %}
 
-  <div class="card shadow-sm border-0">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="card-title fw-bold mb-0">Tabel Artis</h5>
+  <section class="luxury-section">
+      <div class="d-flex justify-content-between align-items-center gap-4 mb-5 flex-wrap">
+        <h2 class="mb-0">Directory</h2>
         <input
           type="text"
           id="searchArtis"
-          class="form-control w-25"
+          class="form-control"
+          style="max-width: 360px"
           placeholder="Cari nama artis atau genre..."
         />
       </div>
 
       <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-dark">
+        <table class="table align-middle">
+          <thead>
             <tr>
               <th scope="col">No</th>
               <th scope="col">Nama Artis</th>
@@ -95,9 +85,9 @@
           </tbody>
         </table>
       </div>
-    </div>
+  </section>
   </div>
-</div>
+</section>
 
 <script>
 
@@ -196,7 +186,7 @@
         if (artists.length === 0) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">Tidak ada artis yang ditemukan.</td>
+                    <td colspan="5" class="text-center py-4">Tidak ada artis yang ditemukan.</td>
                 </tr>
             `;
             return;
@@ -207,11 +197,11 @@
 
             row.innerHTML = `
                 <td>${index + 1}</td>
-                <td class="fw-semibold">${artist.name}</td>
+                <td>${artist.name}</td>
                 <td>${artist.genre}</td>
                 {% if user_role == "ADMIN" %}
                 <td>
-                    <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                    <button class="btn btn-sm">Edit</button>
                 </td>
                 {% endif %}
             `;

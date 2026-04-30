@@ -1,47 +1,94 @@
-{% extends "base.html" %}
+{% extends "common/base.html" %}
 
-{% block title %}Tiktaktuk Login{% endblock %}
+{% block title %}Tiktaktuk Register{% endblock %}
 
 {% block content %}
-    <h2>Register Account</h2>
+<section class="auth-page">
+  <div class="auth-shell">
+    <div class="auth-brand">
+      <div class="auth-badge">TT</div>
+      <h1>TikTakTuk</h1>
+      <p>Daftar untuk Memulai</p>
+    </div>
 
-    {% if error %}
-    <p style="color: red">{{ error }}</p>
-    {% endif %}
+    <div class="auth-card">
+      <h2>Jenis Pengguna</h2>
+      <p class="auth-subtitle">Pilih jenis akun yang sesuai dengan kebutuhan Anda</p>
 
-    <form method="POST" action="{% url 'accounts:register' %}">
-      {% csrf_token %}
+      {% if error %}
+      <p class="luxury-error">{{ error }}</p>
+      {% endif %}
 
-      <div>
-        <label for="username">Username:</label><br />
-        <input type="text" id="username" name="username" required />
-      </div>
-      <br />
+      <form method="POST" action="{% url 'accounts:register' %}">
+        {% csrf_token %}
 
-      <div>
-        <label for="password">Password:</label><br />
-        <input type="password" id="password" name="password" required />
-      </div>
-      <br />
+        <div class="auth-field">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Pilih username" required />
+        </div>
 
-      <div>
-        <label>Select Roles:</label><br />
-        {% for role in roles %}
-        <label>
-          <input type="checkbox" name="roles" value="{{ role.role_id }}" />
-          {{ role.role_name }} </label
-        ><br />
-        {% empty %}
-        <p style="color: gray"><em>No roles found in database.</em></p>
-        {% endfor %}
-      </div>
-      <br />
+        <div class="auth-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Minimal 6 karakter" required />
+        </div>
 
-      <button type="submit">Register</button>
-    </form>
+        <div class="auth-field">
+          <label>Pilih satu role</label>
+          <div class="auth-roles">
+            {% for role in roles %}
+            <label class="auth-role">
+              <input type="radio" name="role" value="{{ role.role_id }}" required />
+              <span class="auth-role-icon" aria-hidden="true">
+                {% if role.role_name == "CUSTOMER" %}
+                  &#128100;
+                {% elif role.role_name == "ORGANIZER" %}
+                  &#127914;
+                {% elif role.role_name == "ADMIN" %}
+                  &#128737;
+                {% else %}
+                  TT
+                {% endif %}
+              </span>
+              <span>
+                <strong>
+                  {% if role.role_name == "CUSTOMER" %}
+                    Pelanggan
+                  {% elif role.role_name == "ORGANIZER" %}
+                    Penyelenggara
+                  {% elif role.role_name == "ADMIN" %}
+                    Administrator
+                  {% else %}
+                    {{ role.role_name }}
+                  {% endif %}
+                </strong>
+                <span style="display: block; color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem">
+                  {% if role.role_name == "CUSTOMER" %}
+                    Beli dan kelola tiket untuk acara favorit Anda
+                  {% elif role.role_name == "ORGANIZER" %}
+                    Buat dan kelola acara serta venue Anda
+                  {% elif role.role_name == "ADMIN" %}
+                    Kelola sistem dan pantau aktivitas platform
+                  {% else %}
+                    Pilih sebagai {{ role.role_name|lower }}
+                  {% endif %}
+                </span>
+              </span>
+            </label>
+            {% empty %}
+            <p>No roles found in database.</p>
+            {% endfor %}
+          </div>
+        </div>
 
-    <p>
-      Already have an account?
-      <a href="{% url 'accounts:login' %}">Login here</a>.
+        <div class="auth-actions">
+          <button class="auth-submit" type="submit">Daftar</button>
+        </div>
+      </form>
+    </div>
+
+    <p class="auth-footer">
+      Sudah punya akun? <a href="{% url 'accounts:login' %}">Login di sini</a>
     </p>
+  </div>
+</section>
 {% endblock %}

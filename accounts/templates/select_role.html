@@ -1,0 +1,67 @@
+{% extends "common/base.html" %}
+
+{% block title %}Pilih Role Login{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+  <div class="auth-shell">
+    <div class="auth-brand">
+      <div class="auth-badge">TT</div>
+      <h1>TikTakTuk</h1>
+      <p>Pilih mode akses akun Anda</p>
+    </div>
+
+    <div class="auth-card">
+      <h2>Login Sebagai</h2>
+      <p class="auth-subtitle">Akun ini memiliki lebih dari satu role</p>
+
+      {% if error %}
+      <p class="luxury-error">{{ error }}</p>
+      {% endif %}
+
+      <form method="POST" action="{% url 'accounts:select_role' %}">
+        {% csrf_token %}
+        <div class="auth-roles">
+          {% for role in roles %}
+          <label class="auth-role">
+            <input type="radio" name="role" value="{{ role.role_name }}" required />
+            <span class="auth-role-icon" aria-hidden="true">
+              {% if role.role_name == "CUSTOMER" %}
+                &#128100;
+              {% elif role.role_name == "ORGANIZER" %}
+                &#127914;
+              {% elif role.role_name == "ADMIN" %}
+                &#128737;
+              {% else %}
+                TT
+              {% endif %}
+            </span>
+            <span>
+              <strong>
+                {% if role.role_name == "CUSTOMER" %}
+                  Pelanggan
+                {% elif role.role_name == "ORGANIZER" %}
+                  Penyelenggara
+                {% elif role.role_name == "ADMIN" %}
+                  Administrator
+                {% else %}
+                  {{ role.role_name }}
+                {% endif %}
+              </strong>
+              <span style="display: block; color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem">
+                Masuk dengan hak akses {{ role.role_name|lower }}
+              </span>
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+
+        <div class="auth-actions">
+          <a class="auth-secondary btn" href="{% url 'accounts:login' %}">Batal</a>
+          <button class="auth-submit" type="submit">Lanjut</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

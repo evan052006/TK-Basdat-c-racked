@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "artists",
+    "orders",
     "rest_framework",
 ]
 
@@ -96,8 +97,11 @@ DATABASES = {
         "NAME": "tiktaktuk",
         "USER": "postgres",
         "PASSWORD": "12345",
-        "HOST": "localhost",
+        "HOST": "127.0.0.1",
         "PORT": "5432",
+        "OPTIONS": {
+            "options": "-c search_path=tiktaktuk",
+        },
     }
 }
 

@@ -1,0 +1,407 @@
+{% extends "common/base.html" %}
+
+{% block title %}Dashboard Tiktaktuk{% endblock %}
+
+{% block content %}
+<style>
+  .dashboard-page {
+    padding: clamp(1.5rem, 4vw, 3rem) 0;
+  }
+
+  .dashboard-shell {
+    width: min(100% - 2rem, 1120px);
+    margin-inline: auto;
+  }
+
+  .dashboard-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 14px;
+    background: #111c2e;
+    color: #ffffff;
+    padding: clamp(1.5rem, 4vw, 2.2rem);
+  }
+
+  .dashboard-hero.customer {
+    background: #2563ff;
+  }
+
+  .dashboard-eyebrow {
+    margin: 0 0 0.35rem;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .dashboard-hero h1 {
+    margin: 0;
+    color: #ffffff;
+    font-family: "Jost", sans-serif;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 800;
+  }
+
+  .dashboard-hero p:last-child {
+    margin: 0.35rem 0 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.94rem;
+  }
+
+  .dashboard-action {
+    flex: 0 0 auto;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    min-height: 2.35rem;
+    padding: 0.55rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.4rem;
+  }
+
+  .dashboard-card {
+    border: 1px solid #e7eaf0;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+    padding: 1.35rem;
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 138px;
+  }
+
+  .stat-label {
+    margin: 0 0 0.45rem;
+    color: #9aa3b2;
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    margin: 0;
+    color: #182033;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 850;
+    line-height: 1;
+  }
+
+  .stat-caption {
+    margin: 0.5rem 0 0;
+    color: #8b95a5;
+    font-size: 0.83rem;
+    font-weight: 600;
+  }
+
+  .stat-icon {
+    display: grid;
+    place-items: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.8rem;
+    background: #eef4ff;
+    color: #2563ff;
+    font-size: 0.82rem;
+    font-weight: 900;
+  }
+
+  .stat-icon.green {
+    background: #eafbf1;
+    color: #16a34a;
+  }
+
+  .stat-icon.purple {
+    background: #f5edff;
+    color: #9333ea;
+  }
+
+  .stat-icon.orange {
+    background: #fff3e9;
+    color: #f97316;
+  }
+
+  .dashboard-panels {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1.4rem;
+  }
+
+  .dashboard-panel h2 {
+    margin: 0;
+    font-family: "Jost", sans-serif;
+    font-size: 1.12rem;
+    font-weight: 850;
+  }
+
+  .panel-link {
+    color: #2563ff !important;
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .metric-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1.4rem;
+  }
+
+  .metric-row,
+  .event-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .metric-row span:first-child,
+  .event-meta {
+    color: #8b95a5;
+    font-weight: 650;
+  }
+
+  .metric-row strong {
+    color: #182033;
+  }
+
+  .panel-button {
+    display: block;
+    width: 100%;
+    margin-top: 1.2rem;
+    border: 1px solid #e4e8ef;
+    border-radius: 999px;
+    color: #333b4d !important;
+    padding: 0.48rem 1rem;
+    text-align: center;
+    font-weight: 800;
+  }
+
+  .event-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.35rem;
+  }
+
+  .event-row {
+    border-bottom: 1px solid #eef1f5;
+    padding-bottom: 0.95rem;
+  }
+
+  .event-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .event-title {
+    margin: 0;
+    color: #182033;
+    font-weight: 850;
+  }
+
+  .event-meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+  }
+
+  .event-badge {
+    margin-left: 0.45rem;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #15803d;
+    padding: 0.14rem 0.45rem;
+    font-size: 0.64rem;
+    font-weight: 900;
+  }
+
+  @media (max-width: 900px) {
+    .dashboard-stats,
+    .dashboard-panels {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .dashboard-hero,
+    .metric-row,
+    .event-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .dashboard-stats,
+    .dashboard-panels {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="dashboard-page">
+  <div class="dashboard-shell">
+    {% if role == "ADMIN" %}
+      <div class="dashboard-hero">
+        <div>
+          <p class="dashboard-eyebrow">Administrator</p>
+          <h1>System Console</h1>
+          <p>Pantau dan kelola platform TikTakTuk</p>
+        </div>
+        <a class="dashboard-action" href="/orders/#promotions">Promosi</a>
+      </div>
+
+      <div class="dashboard-stats">
+        <article class="dashboard-card stat-card">
+          <div>
+            <p class="stat-label">Total Pengguna</p>
+            <p class="stat-value">2,543</p>
+            <p class="stat-caption">Pengguna aktif</p>
+          </div>
+          <span class="stat-icon">US</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div>
+            <p class="stat-label">Total Acara</p>
+            <p class="stat-value">{{ artist_count|default:0 }}</p>
+            <p class="stat-caption">Data artis aktif</p>
+          </div>
+          <span class="stat-icon green">EV</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div>
+            <p class="stat-label">Omzet Platform</p>
+            <p class="stat-value">Rp {{ revenue_total|floatformat:1 }}</p>
+            <p class="stat-caption">Gross volume</p>
+          </div>
+          <span class="stat-icon purple">RP</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div>
+            <p class="stat-label">Promosi Aktif</p>
+            <p class="stat-value">{{ active_promotions }}</p>
+            <p class="stat-caption">Running campaigns</p>
+          </div>
+          <span class="stat-icon orange">PR</span>
+        </article>
+      </div>
+
+      <div class="dashboard-panels">
+        <section class="dashboard-card dashboard-panel">
+          <h2>Infrastruktur Venue</h2>
+          <div class="metric-list">
+            <div class="metric-row"><span>Total Venue Terdaftar</span><strong>3 Lokasi</strong></div>
+            <div class="metric-row"><span>Reserved Seating</span><strong>2 Venue</strong></div>
+            <div class="metric-row"><span>Kapasitas Terbesar</span><strong>1,000 Kursi</strong></div>
+          </div>
+          <a class="panel-button" href="#">Kelola Venue</a>
+        </section>
+
+        <section class="dashboard-card dashboard-panel">
+          <h2>Marketing &amp; Promosi</h2>
+          <div class="metric-list">
+            <div class="metric-row"><span>Promo Persentase</span><strong>1 Aktif</strong></div>
+            <div class="metric-row"><span>Promo Potongan Nominal</span><strong>{{ promotion_count }} Aktif</strong></div>
+            <div class="metric-row"><span>Total Penggunaan</span><strong>{{ order_count }} Kali</strong></div>
+          </div>
+          <a class="panel-button" href="/orders/#promotions">Kelola Promosi</a>
+        </section>
+      </div>
+    {% elif role == "ORGANIZER" %}
+      <div class="dashboard-hero">
+        <div>
+          <p class="dashboard-eyebrow">Dashboard Penyelenggara</p>
+          <h1>{{ dashboard_user.username|default:"Organizer" }}</h1>
+          <p>Kelola acara aktif Anda</p>
+        </div>
+        <a class="dashboard-action" href="#">Kelola Acara</a>
+      </div>
+
+      <div class="dashboard-stats">
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Acara Aktif</p><p class="stat-value">3</p><p class="stat-caption">Dalam koordinasi</p></div>
+          <span class="stat-icon">EV</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Tiket Terjual</p><p class="stat-value">1,243</p><p class="stat-caption">Total terjual</p></div>
+          <span class="stat-icon green">TK</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Revenue</p><p class="stat-value">Rp 4.8M</p><p class="stat-caption">Bulan ini</p></div>
+          <span class="stat-icon purple">RV</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Venue Mitra</p><p class="stat-value">3</p><p class="stat-caption">Lokasi aktif</p></div>
+          <span class="stat-icon orange">VN</span>
+        </article>
+      </div>
+
+      <section class="dashboard-card dashboard-panel mt-4">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <h2>Performa Acara</h2>
+            <p class="stat-caption">Status acara yang Anda kelola</p>
+          </div>
+          <a class="panel-link" href="#">Lihat Semua</a>
+        </div>
+        <div class="event-list">
+          <div class="event-row"><div><p class="event-title">Konser Melodi Senja <span class="event-badge">LIVE</span></p><p class="event-meta">85% terjual - Jakarta Convention Center</p></div><span>></span></div>
+          <div class="event-row"><div><p class="event-title">Festival Seni Budaya <span class="event-badge">LIVE</span></p><p class="event-meta">85% terjual - Taman Impian Jayakarta</p></div><span>></span></div>
+          <div class="event-row"><div><p class="event-title">Malam Akustik Bandung <span class="event-badge">LIVE</span></p><p class="event-meta">85% terjual - Bandung Hall Center</p></div><span>></span></div>
+        </div>
+      </section>
+    {% else %}
+      <div class="dashboard-hero customer">
+        <div>
+          <p class="dashboard-eyebrow">Selamat datang kembali</p>
+          <h1>{{ dashboard_user.username|default:"Customer" }}</h1>
+          <p>3 acara menarik menunggu Anda</p>
+        </div>
+        <a class="dashboard-action" href="/artists/list/">Cari Tiket</a>
+      </div>
+
+      <div class="dashboard-stats">
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Tiket Aktif</p><p class="stat-value">2</p><p class="stat-caption">Siap digunakan</p></div>
+          <span class="stat-icon">TK</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Acara Diikuti</p><p class="stat-value">12</p><p class="stat-caption">Total pengalaman</p></div>
+          <span class="stat-icon green">EV</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Kode Promo</p><p class="stat-value">{{ active_promotions }}</p><p class="stat-caption">Tersedia untuk Anda</p></div>
+          <span class="stat-icon purple">PR</span>
+        </article>
+        <article class="dashboard-card stat-card">
+          <div><p class="stat-label">Total Belanja</p><p class="stat-value">Rp 1.6M</p><p class="stat-caption">Bulan ini</p></div>
+          <span class="stat-icon orange">BL</span>
+        </article>
+      </div>
+
+      <section class="dashboard-card dashboard-panel mt-4">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <h2>Tiket Mendatang</h2>
+            <p class="stat-caption">Tiket pertunjukan yang akan datang</p>
+          </div>
+          <a class="panel-link" href="#">Lihat Semua</a>
+        </div>
+        <div class="event-list">
+          <div class="event-row"><div><p class="event-title">Konser Melodi Senja <span class="event-badge">WVIP</span></p><p class="event-meta">15 Mei 2024 - Jakarta Convention Center</p></div><span>></span></div>
+          <div class="event-row"><div><p class="event-title">Festival Seni Budaya <span class="event-badge">GENERAL</span></p><p class="event-meta">22 Mei 2024 - Taman Impian Jayakarta</p></div><span>></span></div>
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
