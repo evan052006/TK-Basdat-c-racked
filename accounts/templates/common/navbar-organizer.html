@@ -18,11 +18,11 @@
         <li class="nav-item"><a class="nav-link" href="#">Event Saya</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Manajemen Venue</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Manajemen Kursi</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'artists:list' %}">Artis</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Kategori Tiket</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Manajemen Tiket</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Semua Order</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Tiket (Aset)</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Order (Aset)</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'orders:orders_list' %}">Semua Order</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'orders:promotions_list' %}">Promosi</a></li>
       </ul>
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Profil</a></li>
