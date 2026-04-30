@@ -1,0 +1,228 @@
+{% extends "common/base.html" %}
+{% block title %}Manajemen Tiket – TikTakTuk{% endblock %}
+{% block content %}
+<div class="luxury-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:0.2rem;">
+          {% if role == "CUSTOMER" %}Tiket Saya{% else %}Manajemen Tiket{% endif %}
+        </h1>
+        <p style="margin:0;">
+          {% if role == "CUSTOMER" %}Kelola dan akses tiket pertunjukan Anda{% else %}Kelola tiket: tambah, ubah status, dan hapus tiket{% endif %}
+        </p>
+      </div>
+      {% if role == "ADMIN" or role == "ORGANIZER" %}
+      <button data-bs-toggle="modal" data-bs-target="#createTicketModal"
+        style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; background:#205eff !important; border-color:#205eff !important;">
+        + Tambah Tiket
+      </button>
+      {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div class="luxury-grid" style="margin-bottom:1.5rem; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Total Tiket</p>
+        <p style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">{{ total_ticket }}</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Valid</p>
+        <p style="font-size:1.75rem; font-weight:700; color:#16a34a; margin:0;">{{ total_valid }}</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Terpakai</p>
+        <p style="font-size:1.75rem; font-weight:700; color:#d97706; margin:0;">{{ total_used }}</p>
+      </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+      <div style="position:relative; flex:1; min-width:200px;">
+        <span style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); color:var(--muted);">🔍</span>
+        <input type="text" id="searchTicket" placeholder="Cari kode tiket atau nama acara..."
+          style="width:100%; padding-left:2.25rem;">
+      </div>
+      <select id="filterStatus" style="min-width:160px;">
+        <option value="">Semua Status</option>
+        <option value="PAID">Valid</option>
+        <option value="PENDING">Pending</option>
+        <option value="CANCELLED">Dibatalkan</option>
+      </select>
+    </div>
+
+    <!-- Ticket Cards -->
+    <div id="ticketCards" style="display:flex; flex-direction:column; gap:1.25rem;">
+      {% for t in tickets %}
+      <div class="luxury-panel ticket-card" data-code="{{ t.code }}" data-event="{{ t.event_name }}" data-status="{{ t.payment_status }}"
+        style="padding:1.5rem; position:relative;">
+        <div style="display:flex; gap:1rem; align-items:flex-start; flex-wrap:wrap;">
+          <!-- Left icon -->
+          <div style="width:50px; height:50px; border-radius:12px; background:linear-gradient(135deg, #fbbf24, #f59e0b); display:grid; place-items:center; color:#fff; font-size:1.5rem; flex-shrink:0;">
+            🎫
+          </div>
+          <!-- Content -->
+          <div style="flex:1; min-width:250px;">
+            <div style="display:flex; gap:0.4rem; margin-bottom:0.35rem; flex-wrap:wrap;">
+              {% if t.payment_status == "PAID" %}
+              <span style="background:#dcfce7; color:#16a34a; font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:4px; text-transform:uppercase;">VALID</span>
+              {% elif t.payment_status == "PENDING" %}
+              <span style="background:#fef9c3; color:#ca8a04; font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:4px; text-transform:uppercase;">PENDING</span>
+              {% else %}
+              <span style="background:#fee2e2; color:#dc2626; font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:4px; text-transform:uppercase;">BATAL</span>
+              {% endif %}
+              <span style="background:#e0e7ff; color:#4f46e5; font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; border-radius:4px; text-transform:uppercase;">{{ t.category_name }}</span>
+            </div>
+            <h4 style="font-size:1.1rem; font-family:'Jost',sans-serif; margin:0 0 0.15rem; font-weight:700;">{{ t.event_name }}</h4>
+            <p style="font-size:0.8rem; margin:0 0 0.75rem; color:var(--muted); font-family:monospace;">{{ t.code }}</p>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:0.5rem 1.5rem; font-size:0.82rem;">
+              <div>
+                <span style="color:var(--muted); font-size:0.7rem; font-weight:700; text-transform:uppercase; display:block;">Jadwal</span>
+                <span>📅 {{ t.event_date|date:"Y-m-d H:i" }}</span>
+              </div>
+              <div>
+                <span style="color:var(--muted); font-size:0.7rem; font-weight:700; text-transform:uppercase; display:block;">Lokasi</span>
+                <span>📍 {{ t.venue_name }}</span>
+              </div>
+              <div>
+                <span style="color:var(--muted); font-size:0.7rem; font-weight:700; text-transform:uppercase; display:block;">Harga</span>
+                <span style="font-weight:600; color:#dc2626;">Rp {{ t.category_price|floatformat:0 }}</span>
+              </div>
+              <div>
+                <span style="color:var(--muted); font-size:0.7rem; font-weight:700; text-transform:uppercase; display:block;">Order</span>
+                <span style="font-family:monospace; font-size:0.78rem;">{{ t.order_id|truncatechars:12 }}</span>
+              </div>
+              {% if role != "CUSTOMER" %}
+              <div>
+                <span style="color:var(--muted); font-size:0.7rem; font-weight:700; text-transform:uppercase; display:block;">Pelanggan</span>
+                <span>{{ t.customer_name }}</span>
+              </div>
+              {% endif %}
+            </div>
+
+            {% if role == "ADMIN" %}
+            <div style="margin-top:0.85rem; display:flex; gap:0.5rem;">
+              <button onclick="openDeleteTicketModal('{{ t.ticket_id }}','{{ t.code }}')"
+                style="background:none !important; border:1px solid #fca5a5 !important; color:#dc2626 !important; padding:0.3rem 0.65rem; min-height:unset; border-radius:7px; font-size:0.78rem; display:inline-flex; align-items:center; gap:0.3rem;">
+                🗑 Hapus
+              </button>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="luxury-panel" style="text-align:center; padding:3rem; color:var(--muted);">
+        Belum ada tiket
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+<script>
+  // Search & filter
+  const searchInput = document.getElementById('searchTicket');
+  const filterStatus = document.getElementById('filterStatus');
+  const cards = document.querySelectorAll('.ticket-card');
+
+  function applyFilter() {
+    const q = (searchInput ? searchInput.value : '').toLowerCase();
+    const s = (filterStatus ? filterStatus.value : '').toUpperCase();
+    cards.forEach(card => {
+      const code = (card.dataset.code || '').toLowerCase();
+      const event = (card.dataset.event || '').toLowerCase();
+      const status = (card.dataset.status || '').toUpperCase();
+      const matchQ = !q || code.includes(q) || event.includes(q);
+      const matchS = !s || status === s;
+      card.style.display = (matchQ && matchS) ? '' : 'none';
+    });
+  }
+
+  if (searchInput) searchInput.addEventListener('input', applyFilter);
+  if (filterStatus) filterStatus.addEventListener('change', applyFilter);
+
+  {% if role == "ADMIN" %}
+  function openDeleteTicketModal(ticketId, code) {
+    document.getElementById('deleteTicketId').value = ticketId;
+    document.getElementById('deleteTicketCode').textContent = code;
+    new bootstrap.Modal(document.getElementById('deleteTicketModal')).show();
+  }
+  {% endif %}
+</script>
+{% endblock %}
+
+{% block modals %}
+{% if role == "ADMIN" or role == "ORGANIZER" %}
+<!-- Create Ticket Modal -->
+<div class="modal fade" id="createTicketModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Tambah Tiket Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'tickets:create_ticket' %}">
+        {% csrf_token %}
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">ORDER</label>
+            <select name="torder_id" style="width:100%;" required>
+              <option value="">-- Pilih Order --</option>
+              {% for o in orders %}
+              <option value="{{ o.order_id }}">{{ o.order_id|truncatechars:12 }} — {{ o.customer_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">KATEGORI TIKET</label>
+            <select name="tcategory_id" style="width:100%;" required>
+              <option value="">-- Pilih Kategori --</option>
+              {% for c in categories %}
+              <option value="{{ c.tcategory_id }}">{{ c.name }} — Rp {{ c.price|floatformat:0 }} ({{ c.event_name }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">KODE TIKET</label>
+            <input type="text" disabled placeholder="Auto-generate saat dibuat" style="width:100%; opacity:0.6;">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" style="background:#205eff !important; border-color:#205eff !important;">Buat Tiket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if role == "ADMIN" %}
+<!-- Delete Ticket Modal -->
+<div class="modal fade" id="deleteTicketModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700; color:#dc2626;">Hapus Tiket</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'tickets:delete_ticket' %}">
+        {% csrf_token %}
+        <input type="hidden" name="ticket_id" id="deleteTicketId">
+        <div class="modal-body">
+          <p style="margin:0;">Apakah Anda yakin ingin menghapus tiket <strong id="deleteTicketCode"></strong>? Relasi kursi akan dilepaskan. Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" style="background:#dc2626 !important; border-color:#dc2626 !important;">Hapus</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

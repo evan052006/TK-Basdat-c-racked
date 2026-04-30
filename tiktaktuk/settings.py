@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "accounts",
     "artists",
     "orders",
+    "tickets",
     "rest_framework",
 ]
 
