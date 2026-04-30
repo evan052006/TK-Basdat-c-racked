@@ -6,6 +6,8 @@ from .views import (
     get_performing_artists_count,
     get_artists,
     create_artist,
+    update_artist,
+    delete_artist,
 )
 
 app_name = "artists"
@@ -21,4 +23,6 @@ urlpatterns = [
         name="event_artist_count",
     ),
     path("api/add_artist/", create_artist, name="add_artist"),
+    path("api/update_artist/", update_artist, name="update_artist"),
+    path("api/delete_artist/", delete_artist, name="delete_artist"),
 ]

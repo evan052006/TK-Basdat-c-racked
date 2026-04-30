@@ -27,13 +27,33 @@ def create_artist(request):
 @require_POST
 @require_roles("ADMIN")
 def update_artist(request):
-    pass
+    data = json.loads(request.body)
+
+    artist_id = data.get("artist_id")
+    name = data.get("name")
+    genre = data.get("genre", "")
+
+    if not artist_id or not name:
+        return JsonResponse({"status": "error", "message": "Missing required fields"}, status=400)
+
+    artists_db.update_artist(artist_id=artist_id, name=name, genre=genre)
+
+    return JsonResponse({"status": "success"}, status=200)
 
 
 @require_POST
 @require_roles("ADMIN")
 def delete_artist(request):
-    pass
+    data = json.loads(request.body)
+
+    artist_id = data.get("artist_id")
+
+    if not artist_id:
+        return JsonResponse({"status": "error", "message": "Missing artist_id"}, status=400)
+
+    artists_db.delete_artist(artist_id=artist_id)
+
+    return JsonResponse({"status": "success"}, status=200)
 
 
 @require_roles("GUEST", "CUSTOMER", "ORGANIZER", "ADMIN")

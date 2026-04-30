@@ -21,13 +21,10 @@
             Manajemen
           </a>
           <ul class="dropdown-menu" aria-labelledby="adminManajemenDropdown">
-            <li><a class="dropdown-item" href="#">Manajemen Venue</a></li>
-            <li><a class="dropdown-item" href="#">Manajemen Kursi</a></li>
             <li><a class="dropdown-item" href="{% url 'artists:list' %}">Manajemen Artis</a></li>
             <li><a class="dropdown-item" href="{% url 'orders:promotions_list' %}">Promosi</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Kategori Tiket</a></li>
-            <li><a class="dropdown-item" href="#">Manajemen Tiket</a></li>
+            <li><a class="dropdown-item" href="{% url 'tickets:tickets_list' %}">Manajemen Tiket</a></li>
           </ul>
         </li>
 
@@ -37,8 +34,6 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="adminAsetDropdown">
             <li><a class="dropdown-item" href="{% url 'orders:orders_list' %}">Semua Order</a></li>
-            <li><a class="dropdown-item" href="#">Tiket (Aset)</a></li>
-            <li><a class="dropdown-item" href="#">Order (Aset)</a></li>
           </ul>
         </li>
       </ul>

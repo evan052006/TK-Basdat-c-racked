@@ -1,83 +1,63 @@
 {% extends "common/base.html" %}
-{% block title %}Artists{% endblock %}
+{% block title %}Daftar Artis – TikTakTuk{% endblock %}
 {% block content %}
-<section class="luxury-page">
-  <div class="luxury-container">
-  <div class="mb-5 text-start">
-    <p class="luxury-kicker">Catalogue</p>
-    <h1>Artists</h1>
-    {% if user_role == "ADMIN" %}
-      <button class="btn mt-4" data-bs-toggle="modal" data-bs-target="#tambahArtisModal">Tambah Artis</button>
-    {% endif %}
-  </div>
+<div class="luxury-page">
+  <div class="container">
 
-  <div class="luxury-grid mb-5">
-    <div class="luxury-panel">
-      <p class="luxury-kicker">Total Artis</p>
-      <h3 id="total_artist_text">-</h3>
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:0.2rem;">Daftar Artis</h1>
+        <p style="margin:0;">Kelola artis yang ada di platform TikTakTuk</p>
+      </div>
+      {% if user_role == "ADMIN" %}
+      <button id="btnTambahArtis"
+        style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap; background:#205eff !important; border-color:#205eff !important;">
+        + Tambah Artis
+      </button>
+      {% endif %}
     </div>
-    <div class="luxury-panel">
-      <p class="luxury-kicker">Genre</p>
-      <h3 id="genre_count_text">-</h3>
-    </div>
-    <div class="luxury-panel">
-      <p class="luxury-kicker">Tampil di Event</p>
-      <h3 id="performing_artist_text">-</h3>
-    </div>
-  </div>
 
-  {% if user_role == "ADMIN" %}
-    <div class="modal fade" id="tambahArtisModal" tabindex="-1" aria-labelledby="tambahArtisModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="tambahArtisModalLabel">Tambah Artis Baru</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form id="formTambahArtis">
-            <div class="modal-body">
-              {% csrf_token %}
-              
-              <div class="mb-4">
-                <label for="inputNamaArtis" class="form-label">Nama Artis</label>
-                <input type="text" class="form-control" id="inputNamaArtis" required placeholder="Masukkan nama artis">
-              </div>
-              <div class="mb-4">
-                <label for="inputGenreArtis" class="form-label">Genre</label>
-                <input type="text" class="form-control" id="inputGenreArtis" required placeholder="Masukkan genre artis">
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn">Tambah Artis</button>
-            </div>
-          </form>
+    <!-- Stats -->
+    <div class="luxury-grid" style="margin-bottom:1.5rem; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Total Artis</p>
+        <p id="total_artist_text" style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">-</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Genre</p>
+        <p id="genre_count_text" style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">-</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Tampil di Event</p>
+        <p id="performing_artist_text" style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">-</p>
+      </div>
+    </div>
+
+    <!-- Search & Count -->
+    <div class="luxury-panel" style="margin-bottom:1.5rem;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+        <h3 style="margin:0; font-size:1.35rem;">Tabel Artis</h3>
+      </div>
+
+      <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; align-items:center;">
+        <div style="position:relative; flex:1; min-width:200px;">
+          <span style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); color:var(--muted);">🔍</span>
+          <input type="text" id="searchArtis" placeholder="Cari nama atau genre..."
+            style="width:100%; padding-left:2.25rem;">
         </div>
-      </div>
-    </div>
-  {% endif %}
-
-  <section class="luxury-section">
-      <div class="d-flex justify-content-between align-items-center gap-4 mb-5 flex-wrap">
-        <h2 class="mb-0">Directory</h2>
-        <input
-          type="text"
-          id="searchArtis"
-          class="form-control"
-          style="max-width: 360px"
-          placeholder="Cari nama artis atau genre..."
-        />
+        <span id="countLabel" style="color:var(--muted); font-size:0.85rem; font-weight:600; white-space:nowrap;"></span>
       </div>
 
-      <div class="table-responsive">
-        <table class="table align-middle">
+      <!-- Table -->
+      <div style="overflow:hidden; border-radius:12px; border:1px solid var(--line);">
+        <table style="border-radius:0; box-shadow:none; border:none;">
           <thead>
             <tr>
-              <th scope="col">No</th>
-              <th scope="col">Nama Artis</th>
-              <th scope="col">Genre</th>
+              <th>ARTIS</th>
+              <th>GENRE</th>
               {% if user_role == "ADMIN" %}
-              <th scope="col">Aksi</th>
+              <th style="text-align:center; width:120px;">AKSI</th>
               {% endif %}
             </tr>
           </thead>
@@ -85,215 +65,306 @@
           </tbody>
         </table>
       </div>
-  </section>
+    </div>
+
   </div>
-</section>
+</div>
 
 <script>
+  const searchInput = document.getElementById("searchArtis");
+  const tableBody = document.getElementById("tabelArtisBody");
+  const countLabel = document.getElementById("countLabel");
+  const total_artist_text = document.getElementById("total_artist_text");
+  const genre_count_text = document.getElementById("genre_count_text");
+  const performing_artist_text = document.getElementById("performing_artist_text");
 
+  let searchTimeout = null;
 
-    const formTambahArtis = document.getElementById("formTambahArtis");
+  searchInput.addEventListener("input", function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+    searchTimeout = setTimeout(() => {
+      searchArtistsAPI(query);
+    }, 300);
+  });
 
-    if (formTambahArtis) {
-        formTambahArtis.addEventListener("submit", async function(e) {
-            e.preventDefault();
-            
-            const nama = document.getElementById("inputNamaArtis").value.trim();
-            const genre = document.getElementById("inputGenreArtis").value.trim();
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            
-            try {
-                const response = await fetch("{% url 'artists:add_artist' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify({ name: nama, genre: genre })
-                });
+  const GENRE_COLORS = {
+    'pop': '#dc2626', 'rock': '#7c3aed', 'jazz': '#0d9488',
+    'edm': '#2563eb', 'hiphop': '#ea580c', 'folk': '#16a34a',
+    'indie folk': '#059669', 'indie pop': '#4f46e5',
+    'singer-songwriter': '#c026d3', 'r&b / pop': '#dc2626',
+    'r&b': '#b91c1c',
+  };
 
-                const data = await response.json();
+  function getGenreColor(genre) {
+    const g = (genre || '').toLowerCase();
+    return GENRE_COLORS[g] || '#6b7280';
+  }
 
-                if (response.ok && data.status === "success") {
-                    const modalElement = document.getElementById('tambahArtisModal');
-                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    modalInstance.hide();
-                    
-                    formTambahArtis.reset();
-                    
-                    searchArtistsAPI(searchInput.value.trim()); 
-                    updateArtistCount();
-                    updateGenreCount();
-                    alert("Berhasil menambahkan artis baru!");
-                } else {
-                    alert("Gagal menambahkan artis: " + (data.message || "Kesalahan server"));
-                }
-            } catch (error) {
-                console.error("Gagal melakukan POST artis:", error);
-                alert("Terjadi kesalahan pada sistem.");
-            }
-        });
+  const AVATAR_COLORS = ['#4f46e5','#7c3aed','#059669','#dc2626','#ea580c','#0d9488','#2563eb','#c026d3'];
+
+  function getAvatarColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  }
+
+  async function searchArtistsAPI(query) {
+    try {
+      const url = `{% url 'artists:all_artist' %}?query=${encodeURIComponent(query)}`;
+      const response = await fetch(url, { credentials: 'same-origin' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (data.status === "success") renderArtistTable(data.artists);
+    } catch (error) {
+      console.error("Failed to search artists:", error);
+    }
+  }
+
+  function renderArtistTable(artists) {
+    tableBody.innerHTML = "";
+    countLabel.textContent = `${artists.length} artis ditemukan`;
+
+    if (artists.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:2rem; color:var(--muted);">Tidak ada artis ditemukan</td></tr>`;
+      return;
     }
 
-    const total_artist_text = document.getElementById("total_artist_text");
-    const genre_count_text = document.getElementById("genre_count_text");
-    const performing_artist_text = document.getElementById("performing_artist_text");
-    const searchInput = document.getElementById("searchArtis");
-    const tableBody = document.getElementById("tabelArtisBody");
+    artists.forEach(artist => {
+      const row = document.createElement("tr");
+      const initial = (artist.name || '?')[0].toUpperCase();
+      const color = getAvatarColor(artist.name || '');
+      const genreColor = getGenreColor(artist.genre);
 
-    let searchTimeout = null;
-
-    searchInput.addEventListener("input", function() {
-        clearTimeout(searchTimeout);
-        const query = this.value.trim();
-        searchTimeout = setTimeout(() => {
-            searchArtistsAPI(query);
-        }, 300);
+      row.innerHTML = `
+        <td>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="width:2rem; height:2rem; border-radius:50%; background:${color}; color:#fff; display:grid; place-items:center; font-size:0.8rem; font-weight:700; flex-shrink:0;">${initial}</div>
+            <span style="font-weight:600;">${artist.name}</span>
+          </div>
+        </td>
+        <td>
+          <span style="display:inline-block; background:${genreColor}12; color:${genreColor}; border-radius:999px; padding:0.15rem 0.6rem; font-size:0.72rem; font-weight:700; text-transform:uppercase;">${artist.genre || '-'}</span>
+        </td>
+        {% if user_role == "ADMIN" %}
+        <td style="text-align:center;">
+          <div style="display:flex; gap:0.35rem; justify-content:center;">
+            <button onclick="openEditModal('${artist.artist_id}','${artist.name.replace(/'/g, "\\'")}','${(artist.genre || '').replace(/'/g, "\\'")}')"
+              style="background:none !important; border:1px solid var(--line) !important; color:var(--ink) !important; padding:0.3rem 0.55rem; min-height:unset; border-radius:7px; font-size:0.8rem;">✏️</button>
+            <button onclick="openDeleteModal('${artist.artist_id}','${artist.name.replace(/'/g, "\\'")}')"
+              style="background:none !important; border:1px solid #fca5a5 !important; color:#dc2626 !important; padding:0.3rem 0.55rem; min-height:unset; border-radius:7px; font-size:0.8rem;">🗑</button>
+          </div>
+        </td>
+        {% endif %}
+      `;
+      tableBody.appendChild(row);
     });
+  }
 
-    async function searchArtistsAPI(query) {
-        try {
+  async function updateArtistCount() {
+    try {
+      const res = await fetch("{% url 'artists:artist_count' %}", { credentials: 'same-origin' });
+      const data = await res.json();
+      if (data.status === "success") total_artist_text.innerText = data.total_artists;
+    } catch (e) { console.error(e); }
+  }
 
-            const url = `{% url 'artists:all_artist' %}?query=${encodeURIComponent(query)}`;
-            
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
+  async function updateGenreCount() {
+    try {
+      const res = await fetch("{% url 'artists:genre_count' %}", { credentials: 'same-origin' });
+      const data = await res.json();
+      if (data.status === "success") genre_count_text.innerText = data.total_genre;
+    } catch (e) { console.error(e); }
+  }
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+  async function updateArtistEventCount() {
+    try {
+      const res = await fetch("{% url 'artists:event_artist_count' %}", { credentials: 'same-origin' });
+      const data = await res.json();
+      if (data.status === "success") performing_artist_text.innerText = data.total_artists;
+    } catch (e) { console.error(e); }
+  }
 
-            const data = await response.json();
-
-            if (data.status === "success") {
-                renderArtistTable(data.artists);
-            }
-
-        } catch (error) {
-            console.error("Failed to search artists:", error);
-        }
-    }
-
-    function renderArtistTable(artists) {
-        tableBody.innerHTML = "";
-
-        if (artists.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center py-4">Tidak ada artis yang ditemukan.</td>
-                </tr>
-            `;
-            return;
-        }
-
-        artists.forEach((artist, index) => {
-            const row = document.createElement("tr");
-
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${artist.name}</td>
-                <td>${artist.genre}</td>
-                {% if user_role == "ADMIN" %}
-                <td>
-                    <button class="btn btn-sm">Edit</button>
-                </td>
-                {% endif %}
-            `;
-            
-            tableBody.appendChild(row);
-        });
-    }
-
-    async function updateArtistCount() {
-        try {
-            const response = await fetch("{% url 'artists:artist_count' %}", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.status === "success") {
-                console.log("Updated count:", data.total_artists);
-                total_artist_text.innerText = data.total_artists
-            }
-        } catch (error) {
-            console.error("Failed to fetch artist count:", error);
-        }
-    }
-
-
-    async function updateGenreCount() {
-        try {
-            const response = await fetch("{% url 'artists:genre_count' %}", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.status === "success") {
-                console.log("Updated count:", data.total_genre);
-                genre_count_text.innerText = data.total_genre
-            }
-        } catch (error) {
-            console.error("Failed to fetch genre count:", error);
-        }
-    }
-
-
-    async function updateArtistEventCount() {
-        try {
-            const response = await fetch("{% url 'artists:event_artist_count' %}", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.status === "success") {
-                console.log("Updated count:", data.total_artists);
-                performing_artist_text.innerText = data.total_artists
-            }
-        } catch (error) {
-            console.error("Failed to fetch artist count:", error);
-        }
-    }
-
+  function refreshAll() {
     updateArtistCount();
     updateGenreCount();
     updateArtistEventCount();
-    searchArtistsAPI("");
+    searchArtistsAPI(searchInput.value.trim());
+  }
 
-    setInterval(updateArtistCount, 5000);
-    setInterval(updateGenreCount, 5000);
-    setInterval(updateArtistEventCount, 5000);
+  {% if user_role == "ADMIN" %}
+  // --- Create ---
+  document.getElementById('btnTambahArtis').addEventListener('click', function() {
+    document.getElementById('createName').value = '';
+    document.getElementById('createGenre').value = '';
+    new bootstrap.Modal(document.getElementById('createArtistModal')).show();
+  });
+
+  document.getElementById('formCreateArtis').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const nama = document.getElementById('createName').value.trim();
+    const genre = document.getElementById('createGenre').value.trim();
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    if (!nama) { alert('Nama artis wajib diisi!'); return; }
+    try {
+      const res = await fetch("{% url 'artists:add_artist' %}", {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken': csrfToken},
+        credentials: 'same-origin',
+        body: JSON.stringify({name: nama, genre: genre})
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        bootstrap.Modal.getInstance(document.getElementById('createArtistModal')).hide();
+        refreshAll();
+      } else {
+        alert('Gagal: ' + (data.message || 'Error'));
+      }
+    } catch(err) { alert('Terjadi kesalahan.'); console.error(err); }
+  });
+
+  // --- Edit ---
+  function openEditModal(id, name, genre) {
+    document.getElementById('editArtistId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editGenre').value = genre;
+    new bootstrap.Modal(document.getElementById('editArtistModal')).show();
+  }
+
+  document.getElementById('formEditArtis').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const artistId = document.getElementById('editArtistId').value;
+    const nama = document.getElementById('editName').value.trim();
+    const genre = document.getElementById('editGenre').value.trim();
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    if (!nama) { alert('Nama artis wajib diisi!'); return; }
+    try {
+      const res = await fetch("{% url 'artists:update_artist' %}", {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken': csrfToken},
+        credentials: 'same-origin',
+        body: JSON.stringify({artist_id: artistId, name: nama, genre: genre})
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        bootstrap.Modal.getInstance(document.getElementById('editArtistModal')).hide();
+        refreshAll();
+      } else {
+        alert('Gagal: ' + (data.message || 'Error'));
+      }
+    } catch(err) { alert('Terjadi kesalahan.'); console.error(err); }
+  });
+
+  // --- Delete ---
+  function openDeleteModal(id, name) {
+    document.getElementById('deleteArtistId').value = id;
+    document.getElementById('deleteArtistName').textContent = name;
+    new bootstrap.Modal(document.getElementById('deleteArtistModal')).show();
+  }
+
+  document.getElementById('btnConfirmDelete').addEventListener('click', async function() {
+    const artistId = document.getElementById('deleteArtistId').value;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    try {
+      const res = await fetch("{% url 'artists:delete_artist' %}", {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken': csrfToken},
+        credentials: 'same-origin',
+        body: JSON.stringify({artist_id: artistId})
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'success') {
+        bootstrap.Modal.getInstance(document.getElementById('deleteArtistModal')).hide();
+        refreshAll();
+      } else {
+        alert('Gagal: ' + (data.message || 'Error'));
+      }
+    } catch(err) { alert('Terjadi kesalahan.'); console.error(err); }
+  });
+  {% endif %}
+
+  refreshAll();
 </script>
+{% endblock %}
+
+{% block modals %}
+{% csrf_token %}
+{% if user_role == "ADMIN" %}
+<!-- Create Artist Modal -->
+<div class="modal fade" id="createArtistModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Tambah Artis Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formCreateArtis">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">NAMA ARTIS *</label>
+            <input type="text" id="createName" placeholder="cth. Fourtwnty" style="width:100%;" required>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">GENRE</label>
+            <input type="text" id="createGenre" placeholder="cth. Indie Folk" style="width:100%;">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit">Tambah Artis</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Artist Modal -->
+<div class="modal fade" id="editArtistModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Edit Artis</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formEditArtis">
+        <input type="hidden" id="editArtistId">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">NAMA ARTIS *</label>
+            <input type="text" id="editName" placeholder="Nama artis" style="width:100%;" required>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">GENRE</label>
+            <input type="text" id="editGenre" placeholder="Genre" style="width:100%;">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" style="background:#205eff !important; border-color:#205eff !important;">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Artist Modal -->
+<div class="modal fade" id="deleteArtistModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700; color:#dc2626;">Hapus Artis</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p style="margin:0;">Apakah Anda yakin ingin menghapus artis <strong id="deleteArtistName"></strong> ini? Tindakan ini tidak dapat dibatalkan.</p>
+      </div>
+      <div class="modal-footer">
+        <input type="hidden" id="deleteArtistId">
+        <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+        <button type="button" id="btnConfirmDelete" style="background:#dc2626 !important; border-color:#dc2626 !important;">Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}
