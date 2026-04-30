@@ -210,3 +210,73 @@ def logout(request):
     response.delete_cookie("access_token")
     request.session.flush()
     return response
+
+
+@require_roles("CUSTOMER", "ORGANIZER", "ADMIN")
+def profile(request):
+    user = _current_user(request)
+    if not user:
+        return redirect("accounts:login")
+
+    role = request.user_role if hasattr(request, "user_role") else "GUEST"
+    user_id = str(user["user_id"])
+    editing = request.GET.get("edit") == "1"
+    success = None
+    error = None
+
+    # Load role-specific profile
+    profile_data = None
+    if role == "CUSTOMER":
+        profile_data = accounts_db.get_customer_by_user_id(user_id=user_id)
+    elif role == "ORGANIZER":
+        profile_data = accounts_db.get_organizer_by_user_id(user_id=user_id)
+
+    if request.method == "POST":
+        form_type = request.POST.get("form_type")
+
+        if form_type == "profile":
+            if role == "CUSTOMER":
+                accounts_db.update_customer_profile(
+                    full_name=request.POST.get("full_name"),
+                    phone_number=request.POST.get("phone_number"),
+                    user_id=user_id,
+                )
+                profile_data = accounts_db.get_customer_by_user_id(user_id=user_id)
+            elif role == "ORGANIZER":
+                accounts_db.update_organizer_profile(
+                    organizer_name=request.POST.get("organizer_name"),
+                    contact_email=request.POST.get("contact_email"),
+                    user_id=user_id,
+                )
+                profile_data = accounts_db.get_organizer_by_user_id(user_id=user_id)
+            success = "Profil berhasil diperbarui."
+            editing = False
+
+        elif form_type == "password":
+            old_pw = request.POST.get("old_password")
+            new_pw = request.POST.get("new_password")
+            confirm_pw = request.POST.get("confirm_password")
+
+            if not check_password(old_pw, user["password"]):
+                error = "Password lama tidak sesuai."
+            elif new_pw != confirm_pw:
+                error = "Konfirmasi password baru tidak cocok."
+            elif len(new_pw) < 6:
+                error = "Password baru minimal 6 karakter."
+            else:
+                hashed = make_password(new_pw)
+                accounts_db.update_user_password(user_id=user_id, password=hashed)
+                success = "Password berhasil diperbarui."
+
+    initial = (user.get("username") or "?")[0].upper()
+
+    return render(request, "profile.html", {
+        "dashboard_user": user,
+        "user": user,
+        "role": role,
+        "profile": profile_data,
+        "initial": initial,
+        "editing": editing,
+        "success": success,
+        "error": error,
+    })

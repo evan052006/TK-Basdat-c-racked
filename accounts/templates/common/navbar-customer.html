@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg luxury-nav">
   <div class="container">
-    <a class="navbar-brand" href="/dashboard/">Tiktaktuk</a>
+    <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">TikTakTuk</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -14,14 +14,16 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavCustomer">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="/artists/list/">Artists</a></li>
-        <li class="nav-item"><a class="nav-link" href="/orders/">Orders</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Promotions</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Venues</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Tiket Saya</a></li>
+        <li class="nav-item"><a class="nav-link" href="/orders/">Pesanan</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Cari Event</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Promosi</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Venue</a></li>
+        <li class="nav-item"><a class="nav-link" href="/artists/list/">Artis</a></li>
       </ul>
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="#">Tickets</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Profil</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Profil</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
       </ul>
     </div>

@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg luxury-nav">
   <div class="container">
-    <a class="navbar-brand" href="/dashboard/">Tiktaktuk</a>
+    <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">TikTakTuk</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -13,13 +13,18 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAdmin">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Manajemen Venue</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Manajemen Kursi</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Kategori Tiket</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Manajemen Tiket</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Semua Order</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Tiket (Aset)</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Order (Aset)</a></li>
+      </ul>
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="/artists/list/">Artists</a></li>
-        <li class="nav-item"><a class="nav-link" href="/orders/">Orders</a></li>
-        <li class="nav-item"><a class="nav-link" href="/orders/#promotions">Promotions</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Venues</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Tickets</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Profil</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Profil</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
       </ul>
     </div>

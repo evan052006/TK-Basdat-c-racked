@@ -1,0 +1,162 @@
+{% extends "common/base.html" %}
+
+{% block title %}Profil Saya – TikTakTuk{% endblock %}
+
+{% block content %}
+<div class="luxury-page">
+  <div class="container" style="max-width: 720px;">
+
+    <h1 style="font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 0.25rem;">Profil Saya</h1>
+    <p style="margin-bottom: 2rem;">Kelola informasi pribadi dan preferensi akun Anda</p>
+
+    {% if success %}
+    <div class="luxury-error" style="border-left-color: #22c55e; margin-bottom: 1.25rem;">
+      {{ success }}
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="luxury-error" style="margin-bottom: 1.25rem;">{{ error }}</div>
+    {% endif %}
+
+    <!-- ── Profile Info Card ──────────────────────────────── -->
+    <div class="luxury-panel" style="margin-bottom: 1.25rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 1rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--line);">
+        <div>
+          <p style="font-weight: 700; font-size: 0.9rem; color: var(--ink); margin: 0;">Informasi Profil</p>
+          <p style="font-size: 0.8rem; margin: 0;">Kelola data pribadi Anda di platform TikTakTuk</p>
+        </div>
+        {% if not editing %}
+        <a href="?edit=1" style="display:inline-flex; align-items:center; gap:0.35rem; font-size:0.82rem; font-weight:600; border:1px solid var(--line-strong); border-radius:8px; padding:0.4rem 0.85rem; text-decoration:none; color: var(--ink) !important;">
+          ✏️ Edit
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Avatar -->
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line);">
+        <div style="width:3rem; height:3rem; border-radius:50%; background:#205eff; display:grid; place-items:center; color:#fff; font-size:1.25rem; font-weight:700; flex-shrink:0;">
+          {{ initial }}
+        </div>
+      </div>
+
+      <!-- Role badge -->
+      <p style="font-size:0.75rem; font-weight:700; color:var(--muted); margin-bottom:0.4rem;">Role / Peran</p>
+      {% if role == "CUSTOMER" %}
+        <span style="display:inline-block; background:#dbeafe; color:#1d4ed8; border-radius:999px; padding:0.2rem 0.85rem; font-size:0.78rem; font-weight:700; margin-bottom:1rem;">Pelanggan</span>
+      {% elif role == "ORGANIZER" %}
+        <span style="display:inline-block; background:#ede9fe; color:#7c3aed; border-radius:999px; padding:0.2rem 0.85rem; font-size:0.78rem; font-weight:700; margin-bottom:1rem;">Penyelenggara</span>
+      {% elif role == "ADMIN" %}
+        <span style="display:inline-block; background:#fee2e2; color:#dc2626; border-radius:999px; padding:0.2rem 0.85rem; font-size:0.78rem; font-weight:700; margin-bottom:1rem;">Administrator</span>
+      {% endif %}
+
+      {% if editing %}
+      <!-- ── Edit form ── -->
+      <form method="POST" action="?edit=1">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="profile">
+        {% if role == "CUSTOMER" %}
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.5rem;">
+          <div>
+            <label style="display:block; margin-bottom:0.3rem;">Nama Lengkap</label>
+            <input type="text" name="full_name" value="{{ profile.full_name }}" required style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:0.3rem;">Nomor Telepon</label>
+            <input type="text" name="phone_number" value="{{ profile.phone_number }}" required style="width:100%;">
+          </div>
+        </div>
+        {% elif role == "ORGANIZER" %}
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.5rem;">
+          <div>
+            <label style="display:block; margin-bottom:0.3rem;">Nama Organizer</label>
+            <input type="text" name="organizer_name" value="{{ profile.organizer_name }}" required style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:0.3rem;">Contact Email</label>
+            <input type="email" name="contact_email" value="{{ profile.contact_email }}" required style="width:100%;">
+          </div>
+        </div>
+        {% endif %}
+        <div style="margin-top: 0.85rem;">
+          <label style="display:block; margin-bottom:0.3rem;">Username</label>
+          <input type="text" value="@{{ user.username }}" disabled style="width:100%; opacity:0.5; cursor:not-allowed;">
+          <p style="font-size:0.75rem; margin-top:0.25rem;">Username tidak dapat diubah.</p>
+        </div>
+        <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1rem;">
+          <a href="{% url 'accounts:profile' %}" style="display:inline-flex; align-items:center; padding:0.6rem 1.2rem; border:1px solid var(--line-strong); border-radius:10px; font-size:0.86rem; font-weight:600; text-decoration:none; color:var(--ink) !important;">Batal</a>
+          <button type="submit" style="padding:0.6rem 1.2rem;">Simpan</button>
+        </div>
+      </form>
+
+      {% else %}
+      <!-- ── View mode ── -->
+      {% if role == "CUSTOMER" %}
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.5rem;">
+        <div>
+          <p style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">👤 Nama Lengkap</p>
+          <p style="font-weight:600; color:var(--ink); margin:0;">{{ profile.full_name }}</p>
+        </div>
+        <div>
+          <p style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">📞 Nomor Telepon</p>
+          <p style="font-weight:600; color:var(--ink); margin:0;">{{ profile.phone_number }}</p>
+        </div>
+      </div>
+      {% elif role == "ORGANIZER" %}
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0.5rem;">
+        <div>
+          <p style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">🏢 Nama Organizer</p>
+          <p style="font-weight:600; color:var(--ink); margin:0;">{{ profile.organizer_name }}</p>
+        </div>
+        <div>
+          <p style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">✉️ Contact Email</p>
+          <p style="font-weight:600; color:var(--ink); margin:0;">{{ profile.contact_email }}</p>
+        </div>
+      </div>
+      {% elif role == "ADMIN" %}
+      <div style="margin-top:0.5rem;">
+        <p style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">👤 Username</p>
+        <p style="font-weight:600; color:var(--ink); margin:0;">@{{ user.username }}</p>
+      </div>
+      {% endif %}
+      {% if role != "ADMIN" %}
+      <div style="margin-top:1rem;">
+        <p style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">👤 Username</p>
+        <p style="font-weight:600; color:var(--ink); margin:0;">@{{ user.username }}</p>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <!-- ── Update Password Card ───────────────────────────── -->
+    <div class="luxury-panel">
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+        <span>🔒</span>
+        <p style="font-weight:700; font-size:0.9rem; color:var(--ink); margin:0;">Update Password</p>
+      </div>
+      <p style="font-size:0.8rem; margin-bottom:1.25rem;">Perbarui password Anda untuk menjaga keamanan akun</p>
+
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="password">
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block; margin-bottom:0.3rem;">Password Lama</label>
+          <input type="password" name="old_password" placeholder="Password Lama" style="width:100%;" required>
+        </div>
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block; margin-bottom:0.3rem;">Password Baru</label>
+          <input type="password" name="new_password" placeholder="Password Baru" style="width:100%;" required>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; margin-bottom:0.3rem;">Konfirmasi Password Baru</label>
+          <input type="password" name="confirm_password" placeholder="Konfirmasi Password Baru" style="width:100%;" required>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+          <a href="{% url 'accounts:profile' %}" style="display:inline-flex; align-items:center; padding:0.6rem 1.2rem; border:1px solid var(--line-strong); border-radius:10px; font-size:0.86rem; font-weight:600; text-decoration:none; color:var(--ink) !important;">Cancel</a>
+          <button type="submit">Update Password</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
