@@ -5,12 +5,24 @@
   <div class="container">
 
     <!-- Header -->
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
       <div>
         <h1 style="font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:0.2rem;">Daftar Order</h1>
         <p style="margin:0;">
           {% if role == "CUSTOMER" %}Riwayat pembelian tiket Anda{% elif role == "ORGANIZER" %}Order dari event yang Anda selenggarakan{% else %}Semua order pada platform{% endif %}
         </p>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.55rem; flex-wrap:wrap; justify-content:flex-end;">
+        <a href="{% url 'orders:promotions_list' %}"
+          style="display:inline-flex; align-items:center; gap:0.35rem; background:#fff; color:var(--ink); border:1px solid var(--line-strong); border-radius:10px; padding:0.52rem 0.85rem; text-decoration:none; font-weight:600;">
+          Kelola Promo
+        </a>
+        {% if role == "ADMIN" %}
+        <button data-bs-toggle="modal" data-bs-target="#createOrderModal"
+          style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap;">
+          + Buat Order
+        </button>
+        {% endif %}
       </div>
     </div>
 
@@ -119,8 +131,86 @@
 
   </div>
 </div>
+<script>
+  // Search & filter
+  const searchInput = document.getElementById('searchOrder');
+  const filterStatus = document.getElementById('filterStatus');
+  const rows = document.querySelectorAll('.order-row');
 
+  function applyFilter() {
+    const q = (searchInput ? searchInput.value : '').toLowerCase();
+    const s = (filterStatus ? filterStatus.value : '').toLowerCase();
+    rows.forEach(row => {
+      const id = (row.dataset.id || '').toLowerCase();
+      const cust = (row.dataset.customer || '').toLowerCase();
+      const status = (row.dataset.status || '').toLowerCase();
+      const matchQ = !q || id.includes(q) || cust.includes(q);
+      const matchS = !s || status === s;
+      row.style.display = (matchQ && matchS) ? '' : 'none';
+    });
+  }
+
+  if (searchInput) searchInput.addEventListener('input', applyFilter);
+  if (filterStatus) filterStatus.addEventListener('change', applyFilter);
+
+  {% if role == "ADMIN" %}
+  function openEditModal(orderId, status) {
+    document.getElementById('editOrderId').value = orderId;
+    document.getElementById('editOrderIdDisplay').value = orderId;
+    document.getElementById('editPaymentStatus').value = status;
+    new bootstrap.Modal(document.getElementById('editOrderModal')).show();
+  }
+  function openDeleteModal(orderId) {
+    document.getElementById('deleteOrderId').value = orderId;
+    new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
+  }
+  {% endif %}
+</script>
+{% endblock %}
+
+{% block modals %}
 {% if role == "ADMIN" %}
+<!-- Create Order Modal -->
+<div class="modal fade" id="createOrderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Buat Order Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'orders:create_order' %}">
+        {% csrf_token %}
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">ORDER DATE</label>
+            <input type="datetime-local" name="order_date" style="width:100%;" required>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">PAYMENT STATUS</label>
+            <select name="payment_status" style="width:100%;" required>
+              <option value="PENDING">Pending</option>
+              <option value="PAID">Lunas (PAID)</option>
+              <option value="CANCELLED">Dibatalkan (CANCELLED)</option>
+            </select>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TOTAL AMOUNT</label>
+            <input type="number" name="total_amount" placeholder="cth. 500000" min="0" step="100" style="width:100%;" required>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">CUSTOMER ID</label>
+            <input type="text" name="customer_id" placeholder="Customer UUID" style="width:100%;" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit">Buat</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Edit Modal -->
 <div class="modal fade" id="editOrderModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -178,40 +268,4 @@
   </div>
 </div>
 {% endif %}
-
-<script>
-  // Search & filter
-  const searchInput = document.getElementById('searchOrder');
-  const filterStatus = document.getElementById('filterStatus');
-  const rows = document.querySelectorAll('.order-row');
-
-  function applyFilter() {
-    const q = (searchInput?.value || '').toLowerCase();
-    const s = (filterStatus?.value || '').toLowerCase();
-    rows.forEach(row => {
-      const id = (row.dataset.id || '').toLowerCase();
-      const cust = (row.dataset.customer || '').toLowerCase();
-      const status = (row.dataset.status || '').toLowerCase();
-      const matchQ = !q || id.includes(q) || cust.includes(q);
-      const matchS = !s || status === s;
-      row.style.display = (matchQ && matchS) ? '' : 'none';
-    });
-  }
-
-  searchInput?.addEventListener('input', applyFilter);
-  filterStatus?.addEventListener('change', applyFilter);
-
-  {% if role == "ADMIN" %}
-  function openEditModal(orderId, status) {
-    document.getElementById('editOrderId').value = orderId;
-    document.getElementById('editOrderIdDisplay').value = orderId;
-    document.getElementById('editPaymentStatus').value = status;
-    new bootstrap.Modal(document.getElementById('editOrderModal')).show();
-  }
-  function openDeleteModal(orderId) {
-    document.getElementById('deleteOrderId').value = orderId;
-    new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
-  }
-  {% endif %}
-</script>
 {% endblock %}

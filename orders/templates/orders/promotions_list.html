@@ -10,12 +10,18 @@
         <h1 style="font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:0.2rem;">Manajemen Promosi</h1>
         <p style="margin:0;">Kelola kode promo dan kampanye diskon</p>
       </div>
-      {% if role == "ADMIN" %}
-      <button data-bs-toggle="modal" data-bs-target="#createPromoModal"
-        style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap;">
-        + Buat Promo
-      </button>
-      {% endif %}
+      <div style="display:flex; align-items:center; gap:0.55rem; flex-wrap:wrap; justify-content:flex-end;">
+        <a href="{% url 'orders:orders_list' %}"
+          style="display:inline-flex; align-items:center; gap:0.35rem; background:#fff; color:var(--ink); border:1px solid var(--line-strong); border-radius:10px; padding:0.52rem 0.85rem; text-decoration:none; font-weight:600;">
+          Lihat Order
+        </a>
+        {% if role == "ADMIN" %}
+        <button data-bs-toggle="modal" data-bs-target="#createPromoModal"
+          style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap;">
+          + Buat Promo
+        </button>
+        {% endif %}
+      </div>
     </div>
 
     <!-- Stats -->
@@ -110,6 +116,46 @@
   </div>
 </div>
 
+<script>
+  const searchPromo = document.getElementById('searchPromo');
+  const filterType = document.getElementById('filterType');
+  const promoRows = document.querySelectorAll('.promo-row');
+
+  function applyPromoFilter() {
+    const q = (searchPromo ? searchPromo.value : '').toLowerCase();
+    const t = (filterType ? filterType.value : '').toLowerCase();
+    promoRows.forEach(row => {
+      const code = (row.dataset.code || '').toLowerCase();
+      const type = (row.dataset.type || '').toLowerCase();
+      const matchQ = !q || code.includes(q);
+      const matchT = !t || type === t;
+      row.style.display = (matchQ && matchT) ? '' : 'none';
+    });
+  }
+
+  if (searchPromo) searchPromo.addEventListener('input', applyPromoFilter);
+  if (filterType) filterType.addEventListener('change', applyPromoFilter);
+
+  {% if role == "ADMIN" %}
+  function openEditPromoModal(id, code, type, value, start, end, limit) {
+    document.getElementById('editPromoId').value = id;
+    document.getElementById('editPromoCode').value = code;
+    document.getElementById('editPromoType').value = type;
+    document.getElementById('editPromoValue').value = value;
+    document.getElementById('editPromoStart').value = start;
+    document.getElementById('editPromoEnd').value = end;
+    document.getElementById('editPromoLimit').value = limit;
+    new bootstrap.Modal(document.getElementById('editPromoModal')).show();
+  }
+  function openDeletePromoModal(id, code) {
+    document.getElementById('deletePromoId').value = id;
+    new bootstrap.Modal(document.getElementById('deletePromoModal')).show();
+  }
+  {% endif %}
+</script>
+{% endblock %}
+
+{% block modals %}
 {% if role == "ADMIN" %}
 <!-- Create Promo Modal -->
 <div class="modal fade" id="createPromoModal" tabindex="-1" aria-hidden="true">
@@ -235,42 +281,4 @@
   </div>
 </div>
 {% endif %}
-
-<script>
-  const searchPromo = document.getElementById('searchPromo');
-  const filterType = document.getElementById('filterType');
-  const promoRows = document.querySelectorAll('.promo-row');
-
-  function applyPromoFilter() {
-    const q = (searchPromo?.value || '').toLowerCase();
-    const t = (filterType?.value || '').toLowerCase();
-    promoRows.forEach(row => {
-      const code = (row.dataset.code || '').toLowerCase();
-      const type = (row.dataset.type || '').toLowerCase();
-      const matchQ = !q || code.includes(q);
-      const matchT = !t || type === t;
-      row.style.display = (matchQ && matchT) ? '' : 'none';
-    });
-  }
-
-  searchPromo?.addEventListener('input', applyPromoFilter);
-  filterType?.addEventListener('change', applyPromoFilter);
-
-  {% if role == "ADMIN" %}
-  function openEditPromoModal(id, code, type, value, start, end, limit) {
-    document.getElementById('editPromoId').value = id;
-    document.getElementById('editPromoCode').value = code;
-    document.getElementById('editPromoType').value = type;
-    document.getElementById('editPromoValue').value = value;
-    document.getElementById('editPromoStart').value = start;
-    document.getElementById('editPromoEnd').value = end;
-    document.getElementById('editPromoLimit').value = limit;
-    new bootstrap.Modal(document.getElementById('editPromoModal')).show();
-  }
-  function openDeletePromoModal(id, code) {
-    document.getElementById('deletePromoId').value = id;
-    new bootstrap.Modal(document.getElementById('deletePromoModal')).show();
-  }
-  {% endif %}
-</script>
 {% endblock %}
