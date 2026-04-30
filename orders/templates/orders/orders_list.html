@@ -1,0 +1,217 @@
+{% extends "common/base.html" %}
+{% block title %}Daftar Order – TikTakTuk{% endblock %}
+{% block content %}
+<div class="luxury-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:0.2rem;">Daftar Order</h1>
+        <p style="margin:0;">
+          {% if role == "CUSTOMER" %}Riwayat pembelian tiket Anda{% elif role == "ORGANIZER" %}Order dari event yang Anda selenggarakan{% else %}Semua order pada platform{% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="luxury-grid" style="margin-bottom:1.5rem; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Total Order</p>
+        <p style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">{{ total_order }}</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Lunas</p>
+        <p style="font-size:1.75rem; font-weight:700; color:#16a34a; margin:0;">{{ total_paid }}</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Pending</p>
+        <p style="font-size:1.75rem; font-weight:700; color:#d97706; margin:0;">{{ total_pending }}</p>
+      </div>
+      {% if role == "ADMIN" or role == "ORGANIZER" %}
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Total Revenue</p>
+        <p style="font-size:1.25rem; font-weight:700; color:var(--ink); margin:0;">Rp {{ total_revenue|floatformat:0 }}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Search & Filter -->
+    <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+      <div style="position:relative; flex:1; min-width:200px;">
+        <span style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); color:var(--muted);">🔍</span>
+        <input type="text" id="searchOrder" placeholder="Cari order ID{% if role != 'CUSTOMER' %} atau pelanggan...{% else %}...{% endif %}"
+          style="width:100%; padding-left:2.25rem;">
+      </div>
+      <select id="filterStatus" style="min-width:160px;">
+        <option value="">Semua Status</option>
+        <option value="PAID">Lunas</option>
+        <option value="PENDING">Pending</option>
+        <option value="CANCELLED">Dibatalkan</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="luxury-panel" style="padding:0; overflow:hidden;">
+      <div class="table-responsive">
+        <table style="border-radius:0; box-shadow:none; border:none;">
+          <thead>
+            <tr>
+              <th>ORDER ID</th>
+              {% if role != "CUSTOMER" %}<th>PELANGGAN</th>{% endif %}
+              <th>TANGGAL</th>
+              <th>STATUS</th>
+              <th style="text-align:right;">TOTAL</th>
+              {% if role == "ADMIN" %}<th style="text-align:center;">AKSI</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody id="orderTableBody">
+          {% for o in orders %}
+            <tr class="order-row" data-id="{{ o.order_id }}" data-status="{{ o.payment_status }}" data-customer="{{ o.customer_name }}">
+              <td style="font-family:monospace; font-size:0.82rem; color:var(--muted);">
+                {{ o.order_id|truncatechars:12 }}
+              </td>
+              {% if role != "CUSTOMER" %}
+              <td>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <div style="width:1.75rem; height:1.75rem; border-radius:50%; background:#205eff; color:#fff; display:grid; place-items:center; font-size:0.72rem; font-weight:700; flex-shrink:0;">
+                    {{ o.customer_name|first|upper }}
+                  </div>
+                  <span style="font-weight:500;">{{ o.customer_name }}</span>
+                </div>
+              </td>
+              {% endif %}
+              <td style="color:var(--muted); font-size:0.85rem;">{{ o.order_date|date:"Y-m-d H:i" }}</td>
+              <td>
+                {% if o.payment_status == "PAID" %}
+                  <span style="display:inline-flex; align-items:center; gap:0.3rem; background:#dcfce7; color:#16a34a; border-radius:999px; padding:0.2rem 0.65rem; font-size:0.72rem; font-weight:700;">
+                    ✓ LUNAS
+                  </span>
+                {% elif o.payment_status == "PENDING" %}
+                  <span style="display:inline-flex; align-items:center; gap:0.3rem; background:#fef9c3; color:#ca8a04; border-radius:999px; padding:0.2rem 0.65rem; font-size:0.72rem; font-weight:700;">
+                    ⏳ PENDING
+                  </span>
+                {% else %}
+                  <span style="display:inline-flex; align-items:center; gap:0.3rem; background:#fee2e2; color:#dc2626; border-radius:999px; padding:0.2rem 0.65rem; font-size:0.72rem; font-weight:700;">
+                    ✕ DIBATALKAN
+                  </span>
+                {% endif %}
+              </td>
+              <td style="text-align:right; font-weight:600;">Rp {{ o.total_amount|floatformat:0 }}</td>
+              {% if role == "ADMIN" %}
+              <td style="text-align:center;">
+                <div style="display:flex; gap:0.35rem; justify-content:center;">
+                  <button onclick="openEditModal('{{ o.order_id }}','{{ o.payment_status }}')"
+                    style="background:none !important; border:1px solid var(--line) !important; color:var(--ink) !important; padding:0.3rem 0.55rem; min-height:unset; border-radius:7px; font-size:0.8rem;">✏️</button>
+                  <button onclick="openDeleteModal('{{ o.order_id }}')"
+                    style="background:none !important; border:1px solid #fca5a5 !important; color:#dc2626 !important; padding:0.3rem 0.55rem; min-height:unset; border-radius:7px; font-size:0.8rem;">🗑</button>
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--muted);">Belum ada order</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% if role == "ADMIN" %}
+<!-- Edit Modal -->
+<div class="modal fade" id="editOrderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Update Status Order</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'orders:update_order' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <input type="hidden" name="order_id" id="editOrderId">
+          <div style="margin-bottom:1rem;">
+            <label style="display:block; margin-bottom:0.35rem;">Order ID</label>
+            <input type="text" id="editOrderIdDisplay" disabled style="width:100%; opacity:0.6;">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:0.35rem;">Payment Status</label>
+            <select name="payment_status" id="editPaymentStatus" style="width:100%;">
+              <option value="PAID">Lunas (PAID)</option>
+              <option value="PENDING">Pending</option>
+              <option value="CANCELLED">Dibatalkan (CANCELLED)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700; color:#dc2626;">Hapus Order</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'orders:delete_order' %}">
+        {% csrf_token %}
+        <input type="hidden" name="order_id" id="deleteOrderId">
+        <div class="modal-body">
+          <p style="margin:0;">Apakah Anda yakin ingin menghapus order ini? Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" style="background:#dc2626 !important; border-color:#dc2626 !important;">Hapus</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  // Search & filter
+  const searchInput = document.getElementById('searchOrder');
+  const filterStatus = document.getElementById('filterStatus');
+  const rows = document.querySelectorAll('.order-row');
+
+  function applyFilter() {
+    const q = (searchInput?.value || '').toLowerCase();
+    const s = (filterStatus?.value || '').toLowerCase();
+    rows.forEach(row => {
+      const id = (row.dataset.id || '').toLowerCase();
+      const cust = (row.dataset.customer || '').toLowerCase();
+      const status = (row.dataset.status || '').toLowerCase();
+      const matchQ = !q || id.includes(q) || cust.includes(q);
+      const matchS = !s || status === s;
+      row.style.display = (matchQ && matchS) ? '' : 'none';
+    });
+  }
+
+  searchInput?.addEventListener('input', applyFilter);
+  filterStatus?.addEventListener('change', applyFilter);
+
+  {% if role == "ADMIN" %}
+  function openEditModal(orderId, status) {
+    document.getElementById('editOrderId').value = orderId;
+    document.getElementById('editOrderIdDisplay').value = orderId;
+    document.getElementById('editPaymentStatus').value = status;
+    new bootstrap.Modal(document.getElementById('editOrderModal')).show();
+  }
+  function openDeleteModal(orderId) {
+    document.getElementById('deleteOrderId').value = orderId;
+    new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
+  }
+  {% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,276 @@
+{% extends "common/base.html" %}
+{% block title %}Manajemen Promosi – TikTakTuk{% endblock %}
+{% block content %}
+<div class="luxury-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-size:clamp(1.6rem,3vw,2.2rem); margin-bottom:0.2rem;">Manajemen Promosi</h1>
+        <p style="margin:0;">Kelola kode promo dan kampanye diskon</p>
+      </div>
+      {% if role == "ADMIN" %}
+      <button data-bs-toggle="modal" data-bs-target="#createPromoModal"
+        style="display:inline-flex; align-items:center; gap:0.4rem; white-space:nowrap;">
+        + Buat Promo
+      </button>
+      {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div class="luxury-grid" style="margin-bottom:1.5rem; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Total Promo</p>
+        <p style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">{{ total_promo }}</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Total Penggunaan</p>
+        <p style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">{{ total_usage }}x</p>
+      </div>
+      <div class="luxury-panel">
+        <p class="luxury-kicker" style="margin-bottom:0.35rem;">Tipe Persentase</p>
+        <p style="font-size:1.75rem; font-weight:700; color:var(--ink); margin:0;">{{ total_percentage }}</p>
+      </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+      <div style="position:relative; flex:1; min-width:200px;">
+        <span style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); color:var(--muted);">🔍</span>
+        <input type="text" id="searchPromo" placeholder="Cari kode promo..." style="width:100%; padding-left:2.25rem;">
+      </div>
+      <select id="filterType" style="min-width:160px;">
+        <option value="">Semua Tipe</option>
+        <option value="PERCENTAGE">Persentase</option>
+        <option value="NOMINAL">Nominal</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="luxury-panel" style="padding:0; overflow:hidden;">
+      <div class="table-responsive">
+        <table style="border-radius:0; box-shadow:none; border:none;">
+          <thead>
+            <tr>
+              <th>KODE PROMO</th>
+              <th>TIPE</th>
+              <th>NILAI DISKON</th>
+              <th>MULAI</th>
+              <th>BERAKHIR</th>
+              <th>PENGGUNAAN</th>
+              {% if role == "ADMIN" %}<th style="text-align:center;">AKSI</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+          {% for p in promotions %}
+            <tr class="promo-row" data-code="{{ p.promo_code }}" data-type="{{ p.discount_type }}">
+              <td>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <span style="display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border-radius:4px; background:#f3f4f6; font-size:0.7rem;">🏷</span>
+                  <span style="font-weight:700; font-family:monospace;">{{ p.promo_code }}</span>
+                </div>
+              </td>
+              <td>
+                {% if p.discount_type == "PERCENTAGE" %}
+                  <span style="color:#7c3aed; font-weight:700; font-size:0.78rem;">PERSENTASE</span>
+                {% else %}
+                  <span style="color:#d97706; font-weight:700; font-size:0.78rem;">NOMINAL</span>
+                {% endif %}
+              </td>
+              <td style="font-weight:600;">
+                {% if p.discount_type == "PERCENTAGE" %}
+                  {{ p.discount_value|floatformat:0 }}%
+                {% else %}
+                  Rp {{ p.discount_value|floatformat:0 }}
+                {% endif %}
+              </td>
+              <td style="color:var(--muted); font-size:0.85rem;">{{ p.start_date }}</td>
+              <td style="color:var(--muted); font-size:0.85rem;">{{ p.end_date }}</td>
+              <td style="font-size:0.85rem;">{{ p.usage_count|default:0 }} / {{ p.usage_limit }}</td>
+              {% if role == "ADMIN" %}
+              <td style="text-align:center;">
+                <div style="display:flex; gap:0.35rem; justify-content:center;">
+                  <button onclick="openEditPromoModal('{{ p.promotion_id }}','{{ p.promo_code }}','{{ p.discount_type }}','{{ p.discount_value }}','{{ p.start_date }}','{{ p.end_date }}','{{ p.usage_limit }}')"
+                    style="background:none !important; border:1px solid var(--line) !important; color:var(--ink) !important; padding:0.3rem 0.55rem; min-height:unset; border-radius:7px; font-size:0.8rem;">✏️</button>
+                  <button onclick="openDeletePromoModal('{{ p.promotion_id }}','{{ p.promo_code }}')"
+                    style="background:none !important; border:1px solid #fca5a5 !important; color:#dc2626 !important; padding:0.3rem 0.55rem; min-height:unset; border-radius:7px; font-size:0.8rem;">🗑</button>
+                </div>
+              </td>
+              {% endif %}
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--muted);">Belum ada promosi</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% if role == "ADMIN" %}
+<!-- Create Promo Modal -->
+<div class="modal fade" id="createPromoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Buat Promo Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'orders:create_promotion' %}">
+        {% csrf_token %}
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">KODE PROMO</label>
+            <input type="text" name="promo_code" placeholder="cth. TIKTAK20" style="width:100%;" required>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TIPE DISKON</label>
+            <select name="discount_type" style="width:100%;" required>
+              <option value="PERCENTAGE">Persentase (%)</option>
+              <option value="NOMINAL">Nominal (Rp)</option>
+            </select>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">NILAI DISKON</label>
+            <input type="number" name="discount_value" placeholder="cth. 20" min="0" style="width:100%;" required>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div>
+              <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TANGGAL MULAI</label>
+              <input type="date" name="start_date" style="width:100%;" required>
+            </div>
+            <div>
+              <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TANGGAL BERAKHIR</label>
+              <input type="date" name="end_date" style="width:100%;" required>
+            </div>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">BATAS PENGGUNAAN</label>
+            <input type="number" name="usage_limit" value="1" min="1" style="width:100%;" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit">Buat</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Promo Modal -->
+<div class="modal fade" id="editPromoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700;">Edit Promo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'orders:update_promotion' %}">
+        {% csrf_token %}
+        <input type="hidden" name="promotion_id" id="editPromoId">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:0.9rem;">
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">KODE PROMO</label>
+            <input type="text" name="promo_code" id="editPromoCode" style="width:100%;" required>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TIPE DISKON</label>
+            <select name="discount_type" id="editPromoType" style="width:100%;" required>
+              <option value="PERCENTAGE">Persentase (%)</option>
+              <option value="NOMINAL">Nominal (Rp)</option>
+            </select>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">NILAI DISKON</label>
+            <input type="number" name="discount_value" id="editPromoValue" min="0" style="width:100%;" required>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div>
+              <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TANGGAL MULAI</label>
+              <input type="date" name="start_date" id="editPromoStart" style="width:100%;" required>
+            </div>
+            <div>
+              <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">TANGGAL BERAKHIR</label>
+              <input type="date" name="end_date" id="editPromoEnd" style="width:100%;" required>
+            </div>
+          </div>
+          <div>
+            <label class="luxury-kicker" style="display:block; margin-bottom:0.3rem;">BATAS PENGGUNAAN</label>
+            <input type="number" name="usage_limit" id="editPromoLimit" min="1" style="width:100%;" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Promo Modal -->
+<div class="modal fade" id="deletePromoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="font-family:'Jost',sans-serif; font-weight:700; color:#dc2626;">Hapus Promo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'orders:delete_promotion' %}">
+        {% csrf_token %}
+        <input type="hidden" name="promotion_id" id="deletePromoId">
+        <div class="modal-body">
+          <p style="margin:0;">Apakah Anda yakin ingin menghapus kode promo ini? Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" style="background:#fff !important; border-color:var(--line-strong) !important; color:var(--ink) !important;" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" style="background:#dc2626 !important; border-color:#dc2626 !important;">Hapus</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  const searchPromo = document.getElementById('searchPromo');
+  const filterType = document.getElementById('filterType');
+  const promoRows = document.querySelectorAll('.promo-row');
+
+  function applyPromoFilter() {
+    const q = (searchPromo?.value || '').toLowerCase();
+    const t = (filterType?.value || '').toLowerCase();
+    promoRows.forEach(row => {
+      const code = (row.dataset.code || '').toLowerCase();
+      const type = (row.dataset.type || '').toLowerCase();
+      const matchQ = !q || code.includes(q);
+      const matchT = !t || type === t;
+      row.style.display = (matchQ && matchT) ? '' : 'none';
+    });
+  }
+
+  searchPromo?.addEventListener('input', applyPromoFilter);
+  filterType?.addEventListener('change', applyPromoFilter);
+
+  {% if role == "ADMIN" %}
+  function openEditPromoModal(id, code, type, value, start, end, limit) {
+    document.getElementById('editPromoId').value = id;
+    document.getElementById('editPromoCode').value = code;
+    document.getElementById('editPromoType').value = type;
+    document.getElementById('editPromoValue').value = value;
+    document.getElementById('editPromoStart').value = start;
+    document.getElementById('editPromoEnd').value = end;
+    document.getElementById('editPromoLimit').value = limit;
+    new bootstrap.Modal(document.getElementById('editPromoModal')).show();
+  }
+  function openDeletePromoModal(id, code) {
+    document.getElementById('deletePromoId').value = id;
+    new bootstrap.Modal(document.getElementById('deletePromoModal')).show();
+  }
+  {% endif %}
+</script>
+{% endblock %}
